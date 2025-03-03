@@ -5,9 +5,12 @@ import cors from 'cors';
 
 import { connectDb } from './lib/db.js'
 
+import errorHandler from './middlewares/errorHandler.js'
+
 dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -18,7 +21,7 @@ app.use(cors(
   }
 ));
 
-const port = process.env.PORT || 3000;
+app.use(errorHandler);
 
 const startServer = async () => {
   try {
