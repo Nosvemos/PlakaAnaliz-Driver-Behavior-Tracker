@@ -7,6 +7,9 @@ import { connectDb } from './lib/db.js'
 
 import errorHandler from './middlewares/errorHandler.js'
 
+import plateRoutes from './routes/plateRoutes.js'
+import commentRoutes from './routes/commentRoutes.js'
+
 dotenv.config();
 
 const app = express();
@@ -21,6 +24,8 @@ app.use(cors(
   }
 ));
 
+app.use('/plate', plateRoutes);
+app.use('/comment', commentRoutes);
 app.use(errorHandler);
 
 const startServer = async () => {
