@@ -18,7 +18,7 @@ export const createPlate = async (req, res) => {
 };
 
 export const findPlate = async (req, res) => {
-  const { plate } = req.body;
+  const { plate } = req.params;
   try {
     const plateData = await Plate.findOne({plate});
     if (!plateData) {

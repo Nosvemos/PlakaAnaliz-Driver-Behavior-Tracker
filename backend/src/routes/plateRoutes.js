@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post('/create', requestLimiter, createPlate);
 
-router.post('/find', requestLimiter, findPlate);
+router.get('/:plate', requestLimiter, findPlate);
 
 router.delete('/delete', requestLimiter, deletePlate);
 
