@@ -1,9 +1,21 @@
 import { Plate } from '../models/Plate.js';
 import { Comment } from '../models/Comment.js';
+import errorResponse from '../utils/errorResponse.js'
+import { validationResult } from 'express-validator'
 
-export const createPlate = async (req, res) => {
+export const createPlate = async (req, res, next) => {
   const { plate } = req.body;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new errorResponse('Validation failed!', 400, errors.array()));
+  }
+
   try {
+    const isExists = await Plate.findOne({plate});
+    if (isExists) {
+      return next(new errorResponse('Plate already exists.', 400));
+    }
     const newPlate = new Plate({plate});
     await newPlate.save();
     return res.status(200).json({
@@ -11,40 +23,46 @@ export const createPlate = async (req, res) => {
       data: plate,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message
-    });
+    console.error(error);
+    next(error);
   }
 };
 
-export const findPlate = async (req, res) => {
+export const findPlate = async (req, res, next) => {
   const { plate } = req.params;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new errorResponse('Validation failed!', 400, errors.array()));
+  }
+
   try {
     const plateData = await Plate.findOne({plate});
     if (!plateData) {
-      return res.status(404).json({
-        message: 'Plate not found!'
-      });
+      return next(new errorResponse('Plate can not be found.', 404));
     }
     return res.status(200).json({
-      message: 'Plate found!',
+      message: 'Plate data found!',
       data: plateData,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message
-    });
+    console.error(error);
+    next(error);
   }
 };
 
-export const deletePlate = async (req, res) => {
+export const deletePlate = async (req, res, next) => {
   const { plate } = req.body;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new errorResponse('Validation failed!', 400, errors.array()));
+  }
+
   try {
     const plateData = await Plate.findOne({ plate });
     if (!plateData) {
-      return res.status(404).json({
-        message: 'Plate not found!'
-      });
+      return next(new errorResponse('Plate can not be found.', 404));
     }
 
     await Comment.deleteMany({ plate: plateData._id });
@@ -57,8 +75,7 @@ export const deletePlate = async (req, res) => {
     });
 
   } catch (error) {
-    return res.status(500).json({
-      message: error.message
-    })
+    console.error(error);
+    next(error);
   }
 };
