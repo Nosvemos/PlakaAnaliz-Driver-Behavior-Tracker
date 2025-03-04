@@ -26,10 +26,10 @@ app.use(cors(
   }
 ));
 
-app.use('/auth', authRoutes);
-app.use('/plates', plateRoutes);
-app.use('/comments', commentRoutes);
-app.use('/responses', responseRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/plates', plateRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/responses', responseRoutes);
 
 app.use(errorHandler);
 

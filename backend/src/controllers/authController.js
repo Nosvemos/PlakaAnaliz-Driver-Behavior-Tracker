@@ -1,5 +1,4 @@
 import bcrypt from 'bcryptjs';
-import { validationResult } from 'express-validator';
 
 import { User } from '../models/User.js';
 
@@ -52,7 +51,7 @@ export const login = async (req, res, next) => {
 
     const { password: _, ...safeUser } = user.toObject();
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: 'User successfully logged in!',
       user: safeUser
@@ -77,7 +76,7 @@ export const checkAuth = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     if (!user) {
-      return next(new errorResponse('Invalid user!', 403));
+      return next(new errorResponse('Invalid user!', 404));
     }
 
     const { password, ...safeUser } = user.toObject();

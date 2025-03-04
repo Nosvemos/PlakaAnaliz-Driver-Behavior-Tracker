@@ -1,5 +1,3 @@
-import { validationResult } from 'express-validator'
-
 import { Plate } from '../models/Plate.js';
 import { Comment } from '../models/Comment.js';
 import { Response } from '../models/Response.js';

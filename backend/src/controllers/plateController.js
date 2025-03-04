@@ -1,7 +1,6 @@
 import { Plate } from '../models/Plate.js';
 import { Comment } from '../models/Comment.js';
 import errorResponse from '../utils/errorResponse.js'
-import { validationResult } from 'express-validator'
 
 export const createPlate = async (req, res, next) => {
   const { plate } = req.body;

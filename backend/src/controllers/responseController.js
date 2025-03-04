@@ -1,17 +1,11 @@
 import { Comment } from '../models/Comment.js';
 import { Response } from '../models/Response.js';
 import { User } from '../models/User.js';
-import { validationResult } from 'express-validator'
-import errorResponse from '../utils/errorResponse.js'
+import errorResponse from '../utils/errorResponse.js';
 
 export const createResponse = async (req, res, next) => {
   const { commentId, response } = req.body;
   const userId = req?.userId;
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new errorResponse('Validation failed!', 400, errors.array()));
-  }
 
   try {
     const commentData = await Comment.findById(commentId);
@@ -58,11 +52,6 @@ export const updateResponse = async (req, res, next) => {
   const { response } = req.body;
   const { responseId } = req.params;
   const userId = req?.userId;
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new errorResponse('Validation failed!', 400, errors.array()));
-  }
 
   try {
     const responseData = await Response.findById(responseId);
