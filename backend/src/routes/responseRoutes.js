@@ -4,7 +4,6 @@ import {
   createResponse,
   updateResponse,
   deleteResponse,
-  commentResponses
 } from '../controllers/responseController.js';
 
 import requestLimiter from '../middlewares/requestLimiter.js';
@@ -12,16 +11,16 @@ import { verifyToken } from '../middlewares/verifyToken.js';
 import {
   createResponseValidation,
   updateResponseValidation,
+  deleteResponseValidation
 } from '../middlewares/validators/responseValidators.js';
+import { validateRequest } from '../middlewares/validators/validateRequest.js'
 
 const router = express.Router();
 
-router.post('/create', requestLimiter, verifyToken, createResponseValidation, createResponse);
+router.post('/', requestLimiter, verifyToken, createResponseValidation, validateRequest, createResponse);
 
-router.patch('/update', requestLimiter, verifyToken, updateResponseValidation, updateResponse);
+router.patch('/:responseId', requestLimiter, verifyToken, updateResponseValidation, validateRequest, updateResponse);
 
-router.delete('/delete', requestLimiter, verifyToken, deleteResponse);
-
-router.post('/commentResponses', requestLimiter, commentResponses);
+router.delete('/:responseId', requestLimiter, verifyToken, deleteResponseValidation, validateRequest, deleteResponse);
 
 export default router;

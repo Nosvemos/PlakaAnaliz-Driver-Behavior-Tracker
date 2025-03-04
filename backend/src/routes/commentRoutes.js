@@ -4,26 +4,31 @@ import {
   createComment,
   updateComment,
   deleteComment,
-  allComments,
-  plateComments
+  plateComments,
+  commentResponses
 } from '../controllers/commentController.js'
 
 import requestLimiter from '../middlewares/requestLimiter.js';
 import { verifyToken } from '../middlewares/verifyToken.js'
 import {
-  createCommentValidation, updateCommentValidation,
+  commentResponsesValidation,
+  createCommentValidation,
+  deleteCommentValidation,
+  plateCommentsValidation,
+  updateCommentValidation,
 } from '../middlewares/validators/commentValidators.js'
+import { validateRequest } from '../middlewares/validators/validateRequest.js'
 
 const router = express.Router();
 
-router.post('/create', requestLimiter, verifyToken, createCommentValidation, createComment);
+router.post('/', requestLimiter, verifyToken, createCommentValidation, validateRequest, createComment);
 
-router.patch('/update', requestLimiter, verifyToken, updateCommentValidation, updateComment);
+router.patch('/:commentId', requestLimiter, verifyToken, updateCommentValidation, validateRequest, updateComment);
 
-router.delete('/delete', requestLimiter, verifyToken, deleteComment);
+router.delete('/:commentId', requestLimiter, verifyToken, deleteCommentValidation, validateRequest, deleteComment);
 
-router.post('/allComments', requestLimiter, allComments);
+router.get('/plate/:plateId', plateCommentsValidation, validateRequest, plateComments);
 
-router.post('/plateComments', requestLimiter, plateComments);
+router.get('/:commentId/responses', commentResponsesValidation, validateRequest, commentResponses);
 
 export default router;

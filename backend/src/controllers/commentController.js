@@ -11,11 +11,6 @@ export const createComment = async (req, res, next) => {
   const { plateId, comment, imageUrl } = req.body;
   const userId = req?.userId;
 
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new errorResponse('Validation failed!', 400, errors.array()));
-  }
-
   try {
     const plateData = await Plate.findById(plateId);
     if (!plateData) {
@@ -59,13 +54,9 @@ export const createComment = async (req, res, next) => {
 };
 
 export const updateComment = async (req, res, next) => {
-  const { commentId, comment, imageUrl } = req.body;
+  const { comment, imageUrl } = req.body;
+  const { commentId } = req.params;
   const userId = req?.userId;
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    next(new errorResponse('Validation failed!', 400, errors.array()));
-  }
 
   try {
     const commentData = await Comment.findById(commentId);
@@ -97,7 +88,7 @@ export const updateComment = async (req, res, next) => {
 }
 
 export const deleteComment = async (req, res, next) => {
-  const { commentId } = req.body;
+  const { commentId } = req.params;
   const userId = req?.userId;
 
   try {
@@ -131,21 +122,8 @@ export const deleteComment = async (req, res, next) => {
   }
 };
 
-export const allComments = async (req, res, next) => {
-  try {
-    const comments = await Comment.find();
-    return res.status(200).json({
-      message: 'All comments data successfully found',
-      data: comments
-    });
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-};
-
 export const plateComments = async (req, res, next) => {
-  const { plateId } = req.body;
+  const { plateId } = req.params;
   try {
     const plateData = await Plate.findById(plateId);
     if (!plateData) {
@@ -155,6 +133,24 @@ export const plateComments = async (req, res, next) => {
     return res.status(200).json({
       message: 'Plate comments data successfully found.',
       data: comments
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+export const commentResponses = async (req, res, next) => {
+  const { commentId } = req.params;
+  try {
+    const commentData = await Comment.findById(commentId);
+    if (!commentData) {
+      return next(new errorResponse('Comment can not be found.', 404));
+    }
+    const responses = await Response.find({comment: commentId});
+    return res.status(200).json({
+      message: 'Comment response data successfully found.',
+      data: responses
     });
   } catch (error) {
     console.error(error);

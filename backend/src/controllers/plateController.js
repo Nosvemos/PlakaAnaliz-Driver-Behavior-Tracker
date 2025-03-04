@@ -6,11 +6,6 @@ import { validationResult } from 'express-validator'
 export const createPlate = async (req, res, next) => {
   const { plate } = req.body;
 
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new errorResponse('Validation failed!', 400, errors.array()));
-  }
-
   try {
     const isExists = await Plate.findOne({plate});
     if (isExists) {
@@ -18,9 +13,10 @@ export const createPlate = async (req, res, next) => {
     }
     const newPlate = new Plate({plate});
     await newPlate.save();
-    return res.status(200).json({
+    return res.status(201).json({
+      success: true,
       message: 'Plate created successfully!',
-      data: plate,
+      data: newPlate,
     });
   } catch (error) {
     console.error(error);
@@ -31,17 +27,13 @@ export const createPlate = async (req, res, next) => {
 export const findPlate = async (req, res, next) => {
   const { plate } = req.params;
 
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new errorResponse('Validation failed!', 400, errors.array()));
-  }
-
   try {
     const plateData = await Plate.findOne({plate});
     if (!plateData) {
       return next(new errorResponse('Plate can not be found.', 404));
     }
     return res.status(200).json({
+      success: true,
       message: 'Plate data found!',
       data: plateData,
     });
@@ -52,12 +44,7 @@ export const findPlate = async (req, res, next) => {
 };
 
 export const deletePlate = async (req, res, next) => {
-  const { plate } = req.body;
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new errorResponse('Validation failed!', 400, errors.array()));
-  }
+  const { plate } = req.params;
 
   try {
     const plateData = await Plate.findOne({ plate });
@@ -70,6 +57,7 @@ export const deletePlate = async (req, res, next) => {
     await Plate.findOneAndDelete({ plate })
 
     return res.status(200).json({
+      success: true,
       message: 'Plate and related data deleted!',
       data: plateData,
     });

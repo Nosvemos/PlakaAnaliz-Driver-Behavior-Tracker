@@ -11,7 +11,7 @@ export const registerValidation = [
   .trim()
   .notEmpty().withMessage("Username is required.")
   .isLength({ min: 3, max: 20 }).withMessage("Username must be between 3 and 20 characters.")
-  .matches(/^[\w!@#$%^&*()_+={}\[\]:;"'<>,.?/-]+$/)
+  .matches(/^[a-zA-Z0-9!@#$%^&*()_+={}\[\]:;"'<>,.?-]+$/)
   .withMessage("Username can contain letters, numbers, and special characters.")
   .customSanitizer(value => xss(value))
   .custom(async (username) => {

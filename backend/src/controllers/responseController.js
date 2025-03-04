@@ -55,7 +55,8 @@ export const createResponse = async (req, res, next) => {
 };
 
 export const updateResponse = async (req, res, next) => {
-  const { responseId, response } = req.body;
+  const { response } = req.body;
+  const { responseId } = req.params;
   const userId = req?.userId;
 
   const errors = validationResult(req);
@@ -92,7 +93,7 @@ export const updateResponse = async (req, res, next) => {
 };
 
 export const deleteResponse = async (req, res, next) => {
-  const { responseId } = req.body;
+  const { responseId } = req.params;
   const userId = req?.userId;
 
   try {
@@ -118,24 +119,6 @@ export const deleteResponse = async (req, res, next) => {
 
     return res.status(200).json({ message: "Response has been deleted successfully." });
 
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-};
-
-export const commentResponses = async (req, res, next) => {
-  const { commentId } = req.body;
-  try {
-    const commentData = await Comment.findById(commentId);
-    if (!commentData) {
-      return next(new errorResponse('Comment can not be found.', 404));
-    }
-    const responses = await Response.find({comment: commentId});
-    return res.status(200).json({
-      message: 'Comment response data successfully found.',
-      data: responses
-    });
   } catch (error) {
     console.error(error);
     next(error);

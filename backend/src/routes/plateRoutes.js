@@ -6,13 +6,14 @@ import { createPlate, findPlate, deletePlate } from '../controllers/plateControl
 import {
   createPlateValidation, findPlateValidation, deletePlateValidation
 } from '../middlewares/validators/plateValidators.js'
+import { validateRequest } from '../middlewares/validators/validateRequest.js'
 
 const router = express.Router();
 
-router.post('/create', requestLimiter, createPlateValidation, createPlate);
+router.post('/', requestLimiter, createPlateValidation, validateRequest, createPlate);
 
-router.get('/:plate', requestLimiter, findPlateValidation, findPlate);
+router.get('/:plate', findPlateValidation, validateRequest, findPlate);
 
-router.delete('/delete', requestLimiter, deletePlateValidation, deletePlate);
+router.delete('/:plate', requestLimiter, deletePlateValidation, validateRequest, deletePlate);
 
 export default router;

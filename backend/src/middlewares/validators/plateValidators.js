@@ -7,8 +7,8 @@ export const createPlateValidation = [
   .trim()
   .notEmpty().withMessage('License plate is required.')
   .matches(/^(0[1-9]|[1-7][0-9]|80|81) ?[A-Z]{1,3} ?\d{1,4}$/)
-  .withMessage('Enter a valid Turkish license plate. (e.g., 34ABC123, 06 AB 12)')
-  .customSanitizer(value => xss(value))
+  .withMessage('Enter a valid Turkish license plate. (e.g., 34ABC123)')
+  .customSanitizer(value => xss(value.toUpperCase()))
 ];
 
 export const findPlateValidation = [
@@ -17,16 +17,16 @@ export const findPlateValidation = [
   .trim()
   .notEmpty().withMessage('License plate is required.')
   .matches(/^(0[1-9]|[1-7][0-9]|80|81) ?[A-Z]{1,3} ?\d{1,4}$/)
-  .withMessage('Enter a valid Turkish license plate. (e.g., 34ABC123, 06 AB 12)')
-  .customSanitizer(value => xss(value))
+  .withMessage('Enter a valid Turkish license plate. (e.g., 34ABC123)')
+  .customSanitizer(value => xss(value.toUpperCase()))
 ];
 
 export const deletePlateValidation = [
   // Plate Validation
-  body('plate')
+  param('plate')
   .trim()
   .notEmpty().withMessage('License plate is required.')
   .matches(/^(0[1-9]|[1-7][0-9]|80|81) ?[A-Z]{1,3} ?\d{1,4}$/)
-  .withMessage('Enter a valid Turkish license plate. (e.g., 34ABC123, 06 AB 12)')
-  .customSanitizer(value => xss(value))
+  .withMessage('Enter a valid Turkish license plate. (e.g., 34ABC123)')
+  .customSanitizer(value => xss(value.toUpperCase()))
 ];

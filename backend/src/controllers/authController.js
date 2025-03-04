@@ -9,11 +9,6 @@ import { setJwtCookie } from '../utils/setJwtCookie.js';
 export const register = async (req, res, next) => {
   const { username, email, password } = req.body;
 
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new errorResponse('Validation failed!', 400, errors.array()));
-  }
-
   try {
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -39,11 +34,6 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new errorResponse('Validation failed!', 400, errors.array()));
-  }
 
   try {
     const user = await User.findOne({

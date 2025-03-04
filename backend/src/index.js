@@ -27,9 +27,9 @@ app.use(cors(
 ));
 
 app.use('/auth', authRoutes);
-app.use('/plate', plateRoutes);
-app.use('/comment', commentRoutes);
-app.use('/response', responseRoutes);
+app.use('/plates', plateRoutes);
+app.use('/comments', commentRoutes);
+app.use('/responses', responseRoutes);
 
 app.use(errorHandler);
 
