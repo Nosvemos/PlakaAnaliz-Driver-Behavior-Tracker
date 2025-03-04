@@ -1,5 +1,6 @@
 import { Plate } from '../models/Plate.js';
 import { Comment } from '../models/Comment.js';
+import { Response } from '../models/Response.js';
 import { User } from '../models/User.js';
 
 export const createComment = async (req, res) => {
@@ -60,15 +61,24 @@ export const updateComment = async (req, res) => {
     if (!commentData) {
       return res.status(404).json({ message: "Comment can not be found." });
     }
+
+    if (!commentData.writer) {
+      return res.status(403).json({ message: "Anonymous comments can not be edited." });
+    }
+
     if (commentData.writer && (commentData.writer.toString() !== userId.toString())) {
       return res.status(403).json({ message: "You dont have permission to edit this comment." });
     }
+
     commentData.comment = comment;
     commentData.imageUrl = imageUrl;
 
     await commentData.save();
 
-    return res.status(200).json({ message: "Comment has been updated successfully." });
+    return res.status(200).json({
+      message: "Comment has been updated successfully.",
+      data: commentData
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Error updating comment: " + error.message
@@ -96,6 +106,8 @@ export const deleteComment = async (req, res) => {
 
     await Comment.findByIdAndDelete(commentId);
 
+    await Response.deleteMany({comment: commentId});
+
     await Plate.findByIdAndUpdate(
       comment.plate,
       { $pull: { comments: commentId } }
@@ -113,7 +125,10 @@ export const deleteComment = async (req, res) => {
 export const allComments = async (req, res, next) => {
   try {
     const comments = await Comment.find();
-    return res.status(200).json(comments);
+    return res.status(200).json({
+      message: 'All comments data successfully found',
+      data: comments
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Error getting all comments: " + error.message
@@ -129,7 +144,10 @@ export const plateComments = async (req, res, next) => {
       return res.status(404).json({ message: "Plate can not be found." });
     }
     const comments = await Comment.find({plate: plateId});
-    return res.status(200).json(comments);
+    return res.status(200).json({
+      message: 'Plate comments data successfully found.',
+      data: comments
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Error getting all comments: " + error.message
