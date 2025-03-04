@@ -11,7 +11,7 @@ export const register = async (req, res, next) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    next(new errorResponse('Validation failed!', 400, errors.array()));
+    return next(new errorResponse('Validation failed!', 400, errors.array()));
   }
 
   try {
@@ -32,6 +32,7 @@ export const register = async (req, res, next) => {
       user: safeUser
     });
   } catch (error) {
+    console.error(error);
     next(error);
   }
 };
@@ -41,7 +42,7 @@ export const login = async (req, res, next) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    next(new errorResponse('Validation failed!', 400, errors.array()));
+    return next(new errorResponse('Validation failed!', 400, errors.array()));
   }
 
   try {
@@ -67,6 +68,7 @@ export const login = async (req, res, next) => {
       user: safeUser
     });
   } catch (error) {
+    console.error(error);
     next(error);
   }
 };
@@ -96,6 +98,7 @@ export const checkAuth = async (req, res, next) => {
       user: safeUser
     });
   } catch (error) {
+    console.error(error);
     next (error);
   }
 };

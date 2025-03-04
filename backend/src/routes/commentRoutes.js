@@ -1,9 +1,5 @@
 import express from 'express';
 
-import requestLimiter from '../middlewares/requestLimiter.js';
-
-import { verifyToken } from '../middlewares/verifyToken.js'
-
 import {
   createComment,
   updateComment,
@@ -12,11 +8,17 @@ import {
   plateComments
 } from '../controllers/commentController.js'
 
+import requestLimiter from '../middlewares/requestLimiter.js';
+import { verifyToken } from '../middlewares/verifyToken.js'
+import {
+  createCommentValidation, updateCommentValidation,
+} from '../middlewares/validators/commentValidators.js'
+
 const router = express.Router();
 
-router.post('/create', requestLimiter, verifyToken, createComment);
+router.post('/create', requestLimiter, verifyToken, createCommentValidation, createComment);
 
-router.patch('/update', requestLimiter, verifyToken, updateComment);
+router.patch('/update', requestLimiter, verifyToken, updateCommentValidation, updateComment);
 
 router.delete('/delete', requestLimiter, verifyToken, deleteComment);
 

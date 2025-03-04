@@ -1,23 +1,32 @@
+import { validationResult } from 'express-validator'
+
 import { Plate } from '../models/Plate.js';
 import { Comment } from '../models/Comment.js';
 import { Response } from '../models/Response.js';
 import { User } from '../models/User.js';
 
-export const createComment = async (req, res) => {
+import errorResponse from '../utils/errorResponse.js'
+
+export const createComment = async (req, res, next) => {
   const { plateId, comment, imageUrl } = req.body;
   const userId = req?.userId;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new errorResponse('Validation failed!', 400, errors.array()));
+  }
 
   try {
     const plateData = await Plate.findById(plateId);
     if (!plateData) {
-      return res.status(404).json({ message: "Plate can not be found." });
+      return next(new errorResponse('Plate can not be found.', 404));
     }
 
     let writerData = null;
     if (userId) {
       writerData = await User.findById(userId);
       if (!writerData) {
-        return res.status(404).json({ message: "User can not be found." });
+        return next(new errorResponse('User can not be found.', 404));
       }
     }
 
@@ -25,7 +34,7 @@ export const createComment = async (req, res) => {
       plate: plateData._id,
       comment,
       imageUrl,
-      ...(userId && { writer: writerData._id })
+      ...(userId && { writer: writerData?._id })
     });
 
     await newComment.save();
@@ -44,28 +53,32 @@ export const createComment = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: "Error creating comment: " + error.message
-    });
+    console.error(error);
+    next(error);
   }
 };
 
-export const updateComment = async (req, res) => {
+export const updateComment = async (req, res, next) => {
   const { commentId, comment, imageUrl } = req.body;
   const userId = req?.userId;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    next(new errorResponse('Validation failed!', 400, errors.array()));
+  }
 
   try {
     const commentData = await Comment.findById(commentId);
     if (!commentData) {
-      return res.status(404).json({ message: "Comment can not be found." });
+      return next(new errorResponse('Comment can not be found.', 404));
     }
 
     if (!commentData.writer) {
-      return res.status(403).json({ message: "Anonymous comments can not be edited." });
+      return next(new errorResponse('Anonymous comments can not be edited.', 403));
     }
 
     if (commentData.writer && (commentData.writer._id.toString() !== userId?.toString())) {
-      return res.status(403).json({ message: "You dont have permission to edit this comment." });
+      return next(new errorResponse('You dont have permission to edit this.', 403));
     }
 
     commentData.comment = comment;
@@ -78,28 +91,27 @@ export const updateComment = async (req, res) => {
       data: commentData
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Error updating comment: " + error.message
-    });
+    console.error(error);
+    next(error);
   }
 }
 
-export const deleteComment = async (req, res) => {
+export const deleteComment = async (req, res, next) => {
   const { commentId } = req.body;
   const userId = req?.userId;
 
   try {
     const comment = await Comment.findById(commentId);
     if (!comment) {
-      return res.status(404).json({ message: "Comment can not be found." });
+      return next(new errorResponse('Comment can not be found.', 404));
     }
 
     if (!comment.writer) {
-      return res.status(403).json({ message: "Anonymous comments can not be deleted." });
+      return next(new errorResponse('Anonymous comments can not be deleted.', 403));
     }
 
     if (comment.writer && (comment.writer._id.toString() !== userId?.toString())) {
-      return res.status(403).json({ message: "You dont have permission to delete this comment." });
+      return next(new errorResponse('You dont have permission to edit this.', 403));
     }
 
     await Comment.findByIdAndDelete(commentId);
@@ -114,9 +126,8 @@ export const deleteComment = async (req, res) => {
     return res.status(200).json({ message: "Comment has been deleted successfully." });
 
   } catch (error) {
-    return res.status(500).json({
-      message: "Error deleting comment: " + error.message
-    });
+    console.error(error);
+    next(error);
   }
 };
 
@@ -128,9 +139,8 @@ export const allComments = async (req, res, next) => {
       data: comments
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Error getting all comments: " + error.message
-    })
+    console.error(error);
+    next(error);
   }
 };
 
@@ -139,7 +149,7 @@ export const plateComments = async (req, res, next) => {
   try {
     const plateData = await Plate.findById(plateId);
     if (!plateData) {
-      return res.status(404).json({ message: "Plate can not be found." });
+      return next(new errorResponse('Plate can not be found.', 404));
     }
     const comments = await Comment.find({plate: plateId});
     return res.status(200).json({
@@ -147,8 +157,7 @@ export const plateComments = async (req, res, next) => {
       data: comments
     });
   } catch (error) {
-    return res.status(500).json({
-      message: "Error getting all comments: " + error.message
-    })
+    console.error(error);
+    next(error);
   }
 };
