@@ -1,4 +1,4 @@
-const errorHandler = (err, req, res) => {
+const errorHandler = (err, req, res, next) => {
   if (err.code === 11000) {
     err.message = 'Duplicate field value entered.';
     err.statusCode = 400;
