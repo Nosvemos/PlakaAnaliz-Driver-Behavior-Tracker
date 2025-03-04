@@ -57,8 +57,6 @@ export const login = async (req, res, next) => {
       return next(new errorResponse('Invalid credentials.', 400));
     }
 
-    await user.save();
-
     setJwtCookie(res, user._id);
 
     const { password: _, ...safeUser } = user.toObject();

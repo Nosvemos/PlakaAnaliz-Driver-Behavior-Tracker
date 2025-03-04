@@ -4,12 +4,12 @@ import { User } from '../models/User.js';
 
 export const createResponse = async (req, res, next) => {
   const { commentId, response } = req.body;
-  const userId = req.user?._id;
+  const userId = req?.userId;
 
   try {
     const commentData = await Comment.findById(commentId);
     if (!commentData) {
-      return res.status(404).json({ message: "Comment can not be found." });
+      return res.status(404).json({ message: "Response can not be found." });
     }
 
     let writerData = null;
@@ -23,7 +23,7 @@ export const createResponse = async (req, res, next) => {
     const newResponse = new Response({
       comment: commentData._id,
       response,
-      ...(userId && { writer: userId })
+      ...(userId && { writer: writerData._id })
     });
 
     await newResponse.save();
@@ -35,23 +35,22 @@ export const createResponse = async (req, res, next) => {
     .populate("writer", "username");
 
     res.status(201).json({
-      message: "Comment has been created successfully!",
+      message: "Response has been created successfully!",
       data: {
-        ...populatedResponse.toObject(),
-        author: populatedResponse.writer ? populatedResponse.writer.username : "Anonymous"
+        ...populatedResponse.toObject()
       }
     });
 
   } catch (error) {
     res.status(500).json({
-      message: "Error creating comment: " + error.message
+      message: "Error creating response: " + error.message
     });
   }
 };
 
 export const updateResponse = async (req, res) => {
   const { responseId, response } = req.body;
-  const userId = req.user?._id;
+  const userId = req?.userId;
 
   try {
     const responseData = await Response.findById(responseId);
@@ -63,7 +62,7 @@ export const updateResponse = async (req, res) => {
       return res.status(403).json({ message: "Anonymous responses can not be edited." });
     }
 
-    if (responseId.writer && (responseId.writer.toString() !== userId.toString())) {
+    if (responseId.writer && (responseId.writer.toString() !== userId?.toString())) {
       return res.status(403).json({ message: "You dont have permission to edit this response." });
     }
 
@@ -84,7 +83,7 @@ export const updateResponse = async (req, res) => {
 
 export const deleteResponse = async (req, res) => {
   const { responseId } = req.body;
-  const userId = req.user?._id;
+  const userId = req?.userId;
 
   try {
     const response = await Response.findById(responseId);
@@ -96,7 +95,7 @@ export const deleteResponse = async (req, res) => {
       return res.status(403).json({ message: "Anonymous responses can not be deleted." });
     }
 
-    if (response.writer && (response.writer.toString() !== userId.toString())) {
+    if (response.writer && (response.writer.toString() !== userId?.toString())) {
       return res.status(403).json({ message: "You dont have permission to delete this response." });
     }
 

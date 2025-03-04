@@ -1,6 +1,8 @@
 import express from 'express';
 
-import requestLimiter from '../middlewares/requestLimiter.js'
+import requestLimiter from '../middlewares/requestLimiter.js';
+
+import { verifyToken } from '../middlewares/verifyToken.js'
 
 import {
   createResponse,
@@ -11,11 +13,11 @@ import {
 
 const router = express.Router();
 
-router.post('/create', requestLimiter, createResponse);
+router.post('/create', requestLimiter, verifyToken, createResponse);
 
-router.patch('/update', requestLimiter, updateResponse);
+router.patch('/update', requestLimiter, verifyToken, updateResponse);
 
-router.delete('/delete', requestLimiter, deleteResponse);
+router.delete('/delete', requestLimiter, verifyToken, deleteResponse);
 
 router.post('/commentResponses', requestLimiter, commentResponses);
 

@@ -13,10 +13,6 @@ const commentSchema = new mongoose.Schema({
     ref: 'User',
     default: null
   },
-  authorName: {
-    type: String,
-    default: 'Anonymous'
-  },
   comment: {
     type: String,
     required: true
@@ -27,16 +23,6 @@ const commentSchema = new mongoose.Schema({
     ref: 'Response'
   }]
 }, { timestamps: true });
-
-commentSchema.pre('save', async function (next) {
-  if (this.writer) {
-    const user = await mongoose.model('User').findById(this.writer);
-    this.authorName = user?.username || 'Anonymous';
-  } else {
-    this.authorName = 'Anonymous';
-  }
-  next();
-});
 
 commentSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
   await Response.deleteMany({ _id: { $in: this.responses } });

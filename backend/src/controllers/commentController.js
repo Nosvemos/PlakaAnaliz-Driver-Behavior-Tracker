@@ -5,7 +5,7 @@ import { User } from '../models/User.js';
 
 export const createComment = async (req, res) => {
   const { plateId, comment, imageUrl } = req.body;
-  const userId = req.user?._id;
+  const userId = req?.userId;
 
   try {
     const plateData = await Plate.findById(plateId);
@@ -25,7 +25,7 @@ export const createComment = async (req, res) => {
       plate: plateData._id,
       comment,
       imageUrl,
-      ...(userId && { writer: userId })
+      ...(userId && { writer: writerData._id })
     });
 
     await newComment.save();
@@ -34,14 +34,12 @@ export const createComment = async (req, res) => {
     await plateData.save();
 
     const populatedComment = await Comment.findById(newComment._id)
-    .populate("writer", "username")
-    .populate("plate", "plate");
+    .populate("writer", "username");
 
     res.status(201).json({
       message: "Comment has been created successfully!",
       data: {
-        ...populatedComment.toObject(),
-        author: populatedComment.writer ? populatedComment.writer.username : "Anonymous"
+        ...populatedComment.toObject()
       }
     });
 
@@ -54,7 +52,7 @@ export const createComment = async (req, res) => {
 
 export const updateComment = async (req, res) => {
   const { commentId, comment, imageUrl } = req.body;
-  const userId = req.user?._id;
+  const userId = req?.userId;
 
   try {
     const commentData = await Comment.findById(commentId);
@@ -66,7 +64,7 @@ export const updateComment = async (req, res) => {
       return res.status(403).json({ message: "Anonymous comments can not be edited." });
     }
 
-    if (commentData.writer && (commentData.writer.toString() !== userId.toString())) {
+    if (commentData.writer && (commentData.writer._id.toString() !== userId?.toString())) {
       return res.status(403).json({ message: "You dont have permission to edit this comment." });
     }
 
@@ -88,7 +86,7 @@ export const updateComment = async (req, res) => {
 
 export const deleteComment = async (req, res) => {
   const { commentId } = req.body;
-  const userId = req.user?._id;
+  const userId = req?.userId;
 
   try {
     const comment = await Comment.findById(commentId);
@@ -100,7 +98,7 @@ export const deleteComment = async (req, res) => {
       return res.status(403).json({ message: "Anonymous comments can not be deleted." });
     }
 
-    if (comment.writer && (comment.writer.toString() !== userId.toString())) {
+    if (comment.writer && (comment.writer._id.toString() !== userId?.toString())) {
       return res.status(403).json({ message: "You dont have permission to delete this comment." });
     }
 
