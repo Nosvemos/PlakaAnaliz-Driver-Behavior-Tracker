@@ -7,6 +7,7 @@ import { connectDb } from './lib/db.js'
 
 import errorHandler from './middlewares/errorHandler.js'
 
+import authRoutes from './routes/authRoutes.js'
 import plateRoutes from './routes/plateRoutes.js'
 import commentRoutes from './routes/commentRoutes.js'
 import responseRoutes from './routes/responseRoutes.js'
@@ -25,9 +26,11 @@ app.use(cors(
   }
 ));
 
+app.use('/auth', authRoutes);
 app.use('/plate', plateRoutes);
 app.use('/comment', commentRoutes);
 app.use('/response', responseRoutes);
+
 app.use(errorHandler);
 
 const startServer = async () => {
