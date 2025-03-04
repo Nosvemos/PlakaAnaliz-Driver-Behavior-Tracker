@@ -109,3 +109,30 @@ export const deleteComment = async (req, res) => {
     });
   }
 };
+
+export const allComments = async (req, res, next) => {
+  try {
+    const comments = await Comment.find();
+    return res.status(200).json(comments);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error getting all comments: " + error.message
+    })
+  }
+};
+
+export const plateComments = async (req, res, next) => {
+  const { plateId } = req.body;
+  try {
+    const plateData = await Plate.findById(plateId);
+    if (!plateData) {
+      return res.status(404).json({ message: "Plate can not be found." });
+    }
+    const comments = await Comment.find({plate: plateId});
+    return res.status(200).json(comments);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error getting all comments: " + error.message
+    })
+  }
+};
