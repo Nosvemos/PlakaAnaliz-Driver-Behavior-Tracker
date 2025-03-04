@@ -4,7 +4,7 @@ import { User } from '../models/User.js';
 
 export const createComment = async (req, res) => {
   const { plateId, comment, imageUrl } = req.body;
-  const writerId = req.user?._id;
+  const userId = req.user?._id;
 
   try {
     const plateData = await Plate.findById(plateId);
@@ -13,8 +13,8 @@ export const createComment = async (req, res) => {
     }
 
     let writerData = null;
-    if (writerId) {
-      writerData = await User.findById(writerId);
+    if (userId) {
+      writerData = await User.findById(userId);
       if (!writerData) {
         return res.status(404).json({ message: "User can not be found." });
       }
@@ -24,7 +24,7 @@ export const createComment = async (req, res) => {
       plate: plateData._id,
       comment,
       imageUrl,
-      ...(writerId && { writer: writerId })
+      ...(userId && { writer: userId })
     });
 
     await newComment.save();
@@ -50,6 +50,31 @@ export const createComment = async (req, res) => {
     });
   }
 };
+
+export const updateComment = async (req, res) => {
+  const { commentId, comment, imageUrl } = req.body;
+  const userId = req.user?._id;
+
+  try {
+    const commentData = await Comment.findById(commentId);
+    if (!commentData) {
+      return res.status(404).json({ message: "Comment can not be found." });
+    }
+    if (commentData.writer && (commentData.writer.toString() !== userId.toString())) {
+      return res.status(403).json({ message: "You dont have permission to edit this comment." });
+    }
+    commentData.comment = comment;
+    commentData.imageUrl = imageUrl;
+
+    await commentData.save();
+
+    return res.status(200).json({ message: "Comment has been updated successfully." });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error updating comment: " + error.message
+    });
+  }
+}
 
 export const deleteComment = async (req, res) => {
   const { commentId } = req.body;
