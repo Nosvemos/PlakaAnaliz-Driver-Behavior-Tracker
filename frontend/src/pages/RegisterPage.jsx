@@ -1,6 +1,8 @@
+import Layout from '../components/Layout.jsx'
+
 const RegisterPage = () => {
   return (
-    <div>RegisterPage</div>
+    <Layout></Layout>
   )
 }
 

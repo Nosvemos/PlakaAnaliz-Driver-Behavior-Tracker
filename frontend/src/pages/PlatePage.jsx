@@ -1,6 +1,8 @@
+import Layout from '../components/Layout.jsx'
+
 const PlatePage = () => {
   return (
-    <div>PlatePage</div>
+    <Layout></Layout>
   )
 }
 

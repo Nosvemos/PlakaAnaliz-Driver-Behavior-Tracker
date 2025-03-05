@@ -1,6 +1,8 @@
+import Layout from '../components/Layout.jsx'
+
 const NotFoundPage = () => {
   return (
-    <div>NotFoundPage</div>
+    <Layout></Layout>
   )
 }
 

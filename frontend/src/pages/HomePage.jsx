@@ -1,6 +1,8 @@
+import Layout from '../components/Layout';
+
 const HomePage = () => {
   return (
-    <div>HomePage</div>
+    <Layout></Layout>
   )
 }
 

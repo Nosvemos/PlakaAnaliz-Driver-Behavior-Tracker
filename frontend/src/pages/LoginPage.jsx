@@ -1,6 +1,8 @@
+import Layout from '../components/Layout.jsx'
+
 const LoginPage = () => {
   return (
-    <div>LoginPage</div>
+    <Layout></Layout>
   )
 }
 
