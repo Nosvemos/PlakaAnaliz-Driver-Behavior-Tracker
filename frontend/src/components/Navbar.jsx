@@ -1,13 +1,11 @@
 import React from 'react'
-import { Car, Search, Palette, GitBranch } from "lucide-react";
+import { Car, Search, Palette } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactCountryFlag from "react-country-flag"
 
-const authUser = 'samet';
-
 const Navbar = () => {
   return (
-    <header className="bg-base-100/80 border-b border-base-300 fixed w-full max-w-6xl left-1/2 -translate-x-1/2 top-5 z-40 p
+    <header className="border-b border-base-300 fixed w-full max-w-6xl left-1/2 -translate-x-1/2 top-5 z-40 p
   backdrop-blur-lg rounded-xl shadow-md">
       <div className="container mx-auto px-4 h-16">
         <div className="flex items-center justify-between h-full">
@@ -28,7 +26,7 @@ const Navbar = () => {
               <div className="rounded-lg flex items-center justify-center">
                 <Search className="size-4 text-primary" />
               </div>
-              <h1 className="text-sm">Find Plate</h1>
+              <h1 className="hidden text-sm sm:inline">Find Plate</h1>
             </Link>
 
             <Link to={"/theme"} className={`flex items-center gap-1 hover:opacity-80 transition-all`}>
@@ -37,9 +35,6 @@ const Navbar = () => {
             </Link>
 
             <div className="flex items-center gap-1 hover:opacity-80 transition-all">
-              <div className="rounded-lg flex items-center justify-center">
-                <GitBranch className="size-4 text-primary" />
-              </div>
               <h1 className="text-sm">v1.0.0 (Beta)</h1>
             </div>
           </div>

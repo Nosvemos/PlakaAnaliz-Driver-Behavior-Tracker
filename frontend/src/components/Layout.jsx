@@ -1,13 +1,20 @@
-const Layout = ({ children, className = '' }) => {
+import Navbar from './Navbar.jsx'
+import Footer from './Footer.jsx'
+
+const Layout = ({ children }) => {
   return (
-    <div className='min-h-screen bg-base-100 flex flex-col'>
-      <div className='flex-1 pt-25 pb-8 px-4'>
-        <div className='mx-auto max-w-6xl'>
-          <div className={`bg-base-100 rounded-xl shadow-lg p-6 min-h-[calc(100vh-10rem)] overflow-y-auto ${className}`}>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+
+      <main className="flex-1 mt-25 min-h-[calc(100vh-14rem)]">
+        <div className="container mx-auto px-4">
+          <div className="bg-base-100 rounded-xl p-6 mx-auto max-w-6xl">
             {children}
           </div>
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 };

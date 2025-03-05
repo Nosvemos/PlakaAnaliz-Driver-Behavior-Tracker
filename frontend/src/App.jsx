@@ -1,8 +1,6 @@
 import { ToastContainer } from 'react-toastify'
 import { Navigate, Routes, Route } from 'react-router-dom'
 
-import Navbar from './components/Navbar'
-
 import HomePage from './pages/HomePage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
@@ -19,7 +17,6 @@ const App = () => {
 
   return (
     <div data-theme={theme}>
-      <Navbar/>
       <Routes>
         <Route path="/" element={<HomePage/>} />
         <Route path="/register" element={!authUser ? <RegisterPage/> : <Navigate to="/" />} />
