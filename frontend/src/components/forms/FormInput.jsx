@@ -19,7 +19,7 @@ const FormInput = ({ icon, type, name, placeholder, value, onChange, pattern, ti
           disabled={disabled}
         />
       </label>
-      <p className={`validator-hint ${validatorHidden} text-left ml-10`}>{validatorHint}</p>
+      <p className={`validator-hint ${validatorHidden} text-left`}>{validatorHint}</p>
     </div>
   );
 };

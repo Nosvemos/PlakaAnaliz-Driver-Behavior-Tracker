@@ -50,7 +50,7 @@ const LoginForm = () => {
         type="password"
         name="password"
         placeholder="Password"
-        minLength='8'
+        minLength='6'
         pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-zğüşıöçĞÜŞİÖÇ\d@$!%*?&]{6,}$"
         required='required'
         title="Password must be at least 6 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)."
@@ -59,6 +59,7 @@ const LoginForm = () => {
         onChange={handleChange}
         disabled={isLoading}
       />
+
       <div className="form-control pt-6">
         {isLoading ?
           <Loader className=' animate-spin mx-auto' size={24} /> :

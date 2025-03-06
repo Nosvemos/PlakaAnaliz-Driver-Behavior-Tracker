@@ -17,9 +17,13 @@ export const useAuthStore = create((set, get) => ({
       const response = await axiosInstance.post(`/auth/register`, { username, email, password });
       set({ user: response.data.user, isAuthenticated: true, isLoading: false });
       toast.success('Your account created successfully.');
-      return response?.data.success;
     } catch (error) {
-      toast.error(error.response.data.message);
+      if (Array.isArray(error.response?.data?.errors) && error.response.data.errors.length > 0) {
+        toast.error(error.response.data.errors[0]);
+      } else {
+        toast.error(error.response?.data?.message || 'Unexpected error occurred.');
+      }
+      return error.response?.data?.success ?? false;
     } finally {
       set ({ isLoading: false });
     }
@@ -32,7 +36,12 @@ export const useAuthStore = create((set, get) => ({
       set({ user: response.data.user, isAuthenticated: true, isLoading: false });
       toast.success('You logged in successfully.');
     } catch (error) {
-      toast.error(error.response.data.message);
+      if (Array.isArray(error.response?.data?.errors) && error.response.data.errors.length > 0) {
+        toast.error(error.response.data.errors[0]);
+      } else {
+        toast.error(error.response?.data?.message || 'Unexpected error occurred.');
+      }
+      return error.response?.data?.success ?? false;
     } finally {
       set ({ isLoading: false });
     }
@@ -45,7 +54,12 @@ export const useAuthStore = create((set, get) => ({
       set({ user: null, isAuthenticated: false });
       toast.success('You logged out successfully.');
     } catch (error) {
-      toast.error(error.response.data.message);
+      if (Array.isArray(error.response?.data?.errors) && error.response.data.errors.length > 0) {
+        toast.error(error.response.data.errors[0]);
+      } else {
+        toast.error(error.response?.data?.message || 'Unexpected error occurred.');
+      }
+      return error.response?.data?.success ?? false;
     } finally {
       set ({ isLoading: false });
     }

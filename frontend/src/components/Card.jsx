@@ -3,7 +3,7 @@ import React from 'react'
 
 const Card = ({ Title, children, Span1, Link1, LinkText1, Span2, Link2, LinkText2, Form }) => {
   return (
-    <div className="card card-border w-full max-w-md rounded-xl shadow-xl px-10">
+    <div className="card card-border w-full max-w-md rounded-xl shadow-md px-10">
       <div className="card-body items-center text-center">
         <h2 className="text-2xl font-bold text-center mb-4">{Title}</h2>
         {Form}

@@ -9,11 +9,9 @@ const LoginPage = () => {
         <Card
           Form= {<LoginForm />}
           Title= 'Login Account'
-          Link1= './forgot-password'
-          LinkText1= 'Forgot password?'
-          Span2= 'Have you signed up yet?'
-          Link2= './signup'
-          LinkText2= 'Sign up'
+          Span1= 'Do not you have an account?'
+          Link1= './register'
+          LinkText1= 'Register'
         />
       </div>
     </Layout>
