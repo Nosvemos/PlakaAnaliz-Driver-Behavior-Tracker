@@ -4,14 +4,13 @@ const plateSchema = new mongoose.Schema({
   plate: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    index: true
   },
   comments: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Comment'
   }]
 }, { timestamps: true });
-
-plateSchema.index({ plate: 1 });
 
 export const Plate = mongoose.model('Plate', plateSchema);
