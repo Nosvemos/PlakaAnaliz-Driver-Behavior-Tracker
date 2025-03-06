@@ -1,9 +1,11 @@
 import React from 'react'
-import { Car, Search, Palette } from "lucide-react";
+import { Car, Search, Palette, LogIn, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactCountryFlag from "react-country-flag"
+import { useAuthStore } from "../store/useAuthStore.js";
 
 const Navbar = () => {
+  const { logout, user,isAuthenticated } = useAuthStore();
   return (
     <header className="border-b border-base-300 fixed w-full max-w-6xl left-1/2 -translate-x-1/2 top-5 z-40 p
   backdrop-blur-lg rounded-xl shadow-md">
@@ -33,6 +35,18 @@ const Navbar = () => {
               <Palette className="w-4 h-4 text-primary" />
               <span className="hidden text-sm sm:inline">Theme</span>
             </Link>
+
+            {(user && isAuthenticated) ? (
+              <button className="flex items-center gap-1 hover:opacity-80 transition-all" onClick={logout}>
+                <LogOut className="w-4 h-4 text-primary" />
+                <span className="hidden text-sm sm:inline">Logout</span>
+              </button>
+            ) : (
+              <Link to={"/login"} className={`flex items-center gap-1 hover:opacity-80 transition-all`}>
+                <LogIn className="w-4 h-4 text-primary" />
+                <span className="hidden text-sm sm:inline">Log in</span>
+              </Link>
+            )}
 
             <div className="flex items-center gap-1 hover:opacity-80 transition-all">
               <h1 className="text-sm">v1.0.0 (Beta)</h1>
