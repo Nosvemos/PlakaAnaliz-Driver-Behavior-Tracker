@@ -3,16 +3,19 @@ import { toast } from 'react-toastify';
 
 import { axiosInstance } from "../lib/axios.js";
 
-export const usePlateStore = create((set, get) => ({
-  plateData: null,
+export const useCommentStore = create((set, get) => ({
+  comments: [],
   isLoading: false,
 
-  findPlate: async (plate) => {
-    set({ isLoading: true, plateData: null });
+  sendComment: async (plateId, comment) => {
+    set({ isLoading: true });
     try {
-      const response = await axiosInstance.get(`/plates/${plate}`);
-      set({ isLoading: false, plateData: response.data.data });
-      return response.data.data;
+      const response = await axiosInstance.post(`/comments`, {
+        comment,
+        plateId
+      });
+      set({ isLoading: false, comments: get().comments.join(response.data.data) });
+      toast.success('Your comment successfully created!');
     } catch (error) {
       if (Array.isArray(error.response?.data?.errors) && error.response.data.errors.length > 0) {
         toast.error(error.response.data.errors[0]);
@@ -21,7 +24,7 @@ export const usePlateStore = create((set, get) => ({
       }
       return error.response?.data?.success ?? false;
     } finally {
-      set ({ isLoading: false });
+      set ({ isLoading: false, plateData: null });
     }
   },
 }));

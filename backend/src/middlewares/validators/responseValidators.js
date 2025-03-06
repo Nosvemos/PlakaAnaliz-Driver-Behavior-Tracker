@@ -6,7 +6,7 @@ export const createResponseValidation = [
   body("response")
   .trim()
   .notEmpty().withMessage("response is required.")
-  .isLength({ min: 3, max: 100 }).withMessage("Response must be between 3 and 100 characters.")
+  .isLength({ min: 10, max: 100 }).withMessage("Response must be between 10 and 100 characters.")
   .customSanitizer((value) => xss(value)),
 
   // commentID Validation
@@ -22,7 +22,7 @@ export const updateResponseValidation = [
   body("response")
   .trim()
   .notEmpty().withMessage("Response is required.")
-  .isLength({ min: 3, max: 100 }).withMessage("Response must be between 3 and 100 characters.")
+  .isLength({ min: 10, max: 100 }).withMessage("Response must be between 3 and 100 characters.")
   .customSanitizer((value) => xss(value)),
 
   // responseID Validation

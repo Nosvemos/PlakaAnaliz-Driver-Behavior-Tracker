@@ -6,7 +6,7 @@ export const createCommentValidation = [
   body("comment")
   .trim()
   .notEmpty().withMessage("Comment is required.")
-  .isLength({ min: 3, max: 500 }).withMessage("Comment must be between 3 and 500 characters.")
+  .isLength({ min: 10, max: 500 }).withMessage("Comment must be between 10 and 500 characters.")
   .customSanitizer((value) => xss(value)),
 
   // ImageURl Validation
@@ -43,7 +43,7 @@ export const updateCommentValidation = [
   body("comment")
   .trim()
   .notEmpty().withMessage("Comment is required.")
-  .isLength({ min: 3, max: 500 }).withMessage("Comment must be between 3 and 500 characters.")
+  .isLength({ min: 10, max: 500 }).withMessage("Comment must be between 10 and 500 characters.")
   .customSanitizer((value) => xss(value))
 ];
 

@@ -36,6 +36,7 @@ export const createResponse = async (req, res, next) => {
     .populate("writer", "username");
 
     res.status(201).json({
+      success: true,
       message: "Response has been created successfully!",
       data: {
         ...populatedResponse.toObject()
@@ -72,6 +73,7 @@ export const updateResponse = async (req, res, next) => {
     await responseData.save();
 
     return res.status(200).json({
+      success: true,
       message: "Response has been updated successfully.",
       data: responseData
     });
@@ -106,7 +108,10 @@ export const deleteResponse = async (req, res, next) => {
       { $pull: { responses: responseId } }
     );
 
-    return res.status(200).json({ message: "Response has been deleted successfully." });
+    return res.status(200).json({
+      message: "Response has been deleted successfully.",
+      success: true
+    });
 
   } catch (error) {
     console.error(error);

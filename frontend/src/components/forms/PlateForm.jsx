@@ -1,12 +1,16 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import PlateInput from './PlateInput.jsx'
 import { validatePlate } from '../../utils/plateUtils.js'
+import { usePlateStore } from '../../store/usePlateStore.js'
+import { Navigate } from 'react-router-dom'
 
 const PlateForm = () => {
   const [input, setInput] = useState('');
   const [error, setError] = useState('');
   const [formattedPlate, setFormattedPlate] = useState('');
+  const { findPlate } = usePlateStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const { error: validationError, formattedPlate: formatted } = validatePlate(input);
@@ -25,9 +29,13 @@ const PlateForm = () => {
     setInput(raw.replace(/ /g, ''));
   };
 
-  const submitForm = () => {
+  const submitForm = async (e) => {
+    e.preventDefault();
+
     if(!error) {
-      console.log(formattedPlate.replace(/\s+/g, "")); //TODO sent request to API.
+      navigate(`/${formattedPlate.replace(/\s+/g, "")}`)
+    } else {
+      toast.error(error);
     }
   }
 
@@ -41,7 +49,7 @@ const PlateForm = () => {
         <PlateInput value={formattedPlate} onChange={handleChange} />
       </div>
       <div className="text-center space-y-2 max-w-4xl mx-auto pt-3 md:pt-6">
-        {error && (
+        {(error && formattedPlate.length > 0) && (
           <div className="text-error text-sm mt-4">
             ⚠️ {error}
           </div>

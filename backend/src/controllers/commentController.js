@@ -39,6 +39,7 @@ export const createComment = async (req, res, next) => {
     .populate("writer", "username");
 
     res.status(201).json({
+      success: true,
       message: "Comment has been created successfully!",
       data: {
         ...populatedComment.toObject()
@@ -76,6 +77,7 @@ export const updateComment = async (req, res, next) => {
     await commentData.save();
 
     return res.status(200).json({
+      success: true,
       message: "Comment has been updated successfully.",
       data: commentData
     });
@@ -112,7 +114,10 @@ export const deleteComment = async (req, res, next) => {
       { $pull: { comments: commentId } }
     );
 
-    return res.status(200).json({ message: "Comment has been deleted successfully." });
+    return res.status(200).json({
+      success: true,
+      message: "Comment has been deleted successfully."
+    });
 
   } catch (error) {
     console.error(error);
@@ -129,6 +134,7 @@ export const plateComments = async (req, res, next) => {
     }
     const comments = await Comment.find({plate: plateId});
     return res.status(200).json({
+      success: true,
       message: 'Plate comments data successfully found.',
       data: comments
     });
@@ -147,6 +153,7 @@ export const commentResponses = async (req, res, next) => {
     }
     const responses = await Response.find({comment: commentId});
     return res.status(200).json({
+      success: true,
       message: 'Comment response data successfully found.',
       data: responses
     });
