@@ -26,7 +26,7 @@ const PlateForm = () => {
   };
 
   const submitForm = () => {
-    if(error.length < 1) {
+    if(!error) {
       console.log(formattedPlate.replace(/\s+/g, "")); //TODO sent request to API.
     }
   }

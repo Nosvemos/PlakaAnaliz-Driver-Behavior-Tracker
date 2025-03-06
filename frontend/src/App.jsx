@@ -22,7 +22,7 @@ const App = () => {
         <Route path="/register" element={!authUser ? <RegisterPage/> : <Navigate to="/" />} />
         <Route path="/login" element={!authUser ? <LoginPage/> : <Navigate to="/" />} />
         <Route path="/theme" element={<ThemePage/>} />
-        <Route path="/plate/:plate" element={<PlatePage/>} />
+        <Route path="/:plate" element={<PlatePage/>} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <ToastContainer toastClassName={'!bg-base-100 !shadow-xl !text-base-content/80'} position="top-center" autoClose={3000}/>
