@@ -67,7 +67,7 @@ export const updateComment = async (req, res, next) => {
       return next(new errorResponse('Anonymous comments can not be edited.', 403));
     }
 
-    if (commentData.writer && (commentData.writer._id.toString() !== userId?.toString())) {
+    if (commentData.writer && (commentData.writer.toString() !== userId?.toString())) {
       return next(new errorResponse('You dont have permission to edit this.', 403));
     }
 
@@ -76,10 +76,14 @@ export const updateComment = async (req, res, next) => {
 
     await commentData.save();
 
+    // Populate the writer information before sending the response
+    const populatedComment = await Comment.findById(commentId)
+    .populate("writer", "username");
+
     return res.status(200).json({
       success: true,
       message: "Comment has been updated successfully.",
-      data: commentData
+      data: populatedComment.toObject()
     });
   } catch (error) {
     console.error(error);
@@ -132,11 +136,26 @@ export const plateComments = async (req, res, next) => {
     if (!plateData) {
       return next(new errorResponse('Plate can not be found.', 404));
     }
-    const comments = await Comment.find({plate: plateId});
+    // Find comments and populate writer field with username if it exists
+    const comments = await Comment.find({plate: plateId})
+    .populate("writer", "username");
+
+    // Transform the comments to include username only if writer exists
+    const formattedComments = comments.map(comment => {
+      const commentObj = comment.toObject();
+
+      // If there's no writer, return the comment without writer field
+      if (!comment.writer) {
+        delete commentObj.writer;
+      }
+
+      return commentObj;
+    });
+
     return res.status(200).json({
       success: true,
       message: 'Plate comments data successfully found.',
-      data: comments
+      data: formattedComments
     });
   } catch (error) {
     console.error(error);

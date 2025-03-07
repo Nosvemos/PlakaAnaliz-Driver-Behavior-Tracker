@@ -8,20 +8,15 @@ const commentSchema = new mongoose.Schema({
     ref: 'Plate',
     required: true
   },
-  writer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
   comment: {
     type: String,
     required: true
   },
   imageUrl: String,
-  responses: [{
+  writer: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Response'
-  }]
+    ref: 'User'
+  },
 }, { timestamps: true });
 
 commentSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
