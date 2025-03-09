@@ -16,12 +16,13 @@ export const createCommentValidation = [
   .isURL({ require_protocol: true }).withMessage("Image URL must be a valid URL starting with http:// or https://")
   .matches(/\.(jpg|jpeg|png|gif)$/i).withMessage("Image URL must end with .jpg, .jpeg, .png, or .gif."),
 
-  // PlateID Validation
-  body("plateId")
+  // Plate Validation
+  body('plate')
   .trim()
-  .notEmpty().withMessage("plateId is required.")
-  .isMongoId().withMessage("Invalid plateId format.")
-  .customSanitizer((value) => xss(value)),
+  .notEmpty().withMessage('License plate is required.')
+  .matches(/^(0[1-9]|[1-7][0-9]|80|81) ?[A-Z]{1,3} ?\d{1,4}$/)
+  .withMessage('Enter a valid Turkish license plate. (e.g., 34ABC123)')
+  .customSanitizer(value => xss(value.toUpperCase()))
 ];
 
 export const updateCommentValidation = [

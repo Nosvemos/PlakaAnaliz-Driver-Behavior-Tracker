@@ -6,13 +6,14 @@ import { User } from '../models/User.js';
 import errorResponse from '../utils/errorResponse.js'
 
 export const createComment = async (req, res, next) => {
-  const { plateId, comment, imageUrl } = req.body;
+  const { plate, comment, imageUrl } = req.body;
   const userId = req?.userId;
 
   try {
-    const plateData = await Plate.findById(plateId);
+    let plateData = await Plate.findOne({plate});
     if (!plateData) {
-      return next(new errorResponse('Plate can not be found.', 404));
+      plateData = new Plate({plate});
+      await plateData.save();
     }
 
     let writerData = null;

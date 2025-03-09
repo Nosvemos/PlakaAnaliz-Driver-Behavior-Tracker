@@ -85,10 +85,13 @@ const RegisterForm = () => {
 
       <PasswordStrengthMeter password={formData.password} />
       <div className="form-control pt-6">
-        {isLoading ?
-          <Loader className='animate-spin mx-auto' size={24} /> :
-          <button className="btn btn-primary btn-outline rounded-md shadow-xl" type="submit">Register</button>
-        }
+        <button
+          className="btn btn-primary btn-outline rounded-md shadow-xl"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? <Loader className='animate-spin mx-auto' size={24} /> : 'Register'}
+        </button>
       </div>
     </form>
   );

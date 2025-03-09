@@ -1,13 +1,17 @@
-import { Link } from 'react-router-dom'
-import React, { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
 import { Loader } from 'lucide-react'
 import { useCommentStore } from '../../store/useCommentStore.js'
+import { validatePlate } from '../../utils/plateUtils.js'
+import { toast } from 'react-toastify'
 
 const CommentForm = ({plateData}) => {
   const [formData, setFormData] = useState({
     comment: '',
     agreeChecked: false
   });
+
+  const { plate } = useParams();
 
   const [submitted, setSubmitted] = useState(false);
   const { isLoading, sendComment } = useCommentStore();
@@ -24,17 +28,27 @@ const CommentForm = ({plateData}) => {
     }));
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    sendComment(plateData._id, formData.comment);
+    const { error: validationError } = validatePlate(plate);
+    if (validationError) {
+      toast.error('Invalid plate form.');
+      return;
+    }
 
-    setSubmitted(true);
-    setFormData({
-      comment: '',
-      agreeChecked: false
-    });
-  }
+    if (!plateData) {
+      toast.error('Plate not found.');
+      return;
+    }
+
+    try {
+      await sendComment(plateData.plate, formData.comment);
+      setFormData({ comment: '', agreeChecked: false });
+    } catch (err) {
+      toast.error('Failed to send comment.');
+    }
+  };
 
   const showValidation = () => {
     return !submitted &&
@@ -79,10 +93,13 @@ const CommentForm = ({plateData}) => {
               </span>
           </label>
           <div className="form-control">
-            {isLoading ?
-              <Loader className='animate-spin mx-auto' size={24} /> :
-              <button className="btn btn-primary btn-outline rounded-md shadow-xl ml-4" type="submit">Send</button>
-            }
+            <button
+              className="btn btn-primary btn-outline rounded-md shadow-xl ml-4"
+              type="submit"
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader className='animate-spin mx-auto' size={24} /> : 'Send'}
+            </button>
           </div>
         </div>
       </fieldset>

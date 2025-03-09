@@ -61,10 +61,13 @@ const LoginForm = () => {
       />
 
       <div className="form-control pt-6">
-        {isLoading ?
-          <Loader className='animate-spin mx-auto' size={24} /> :
-          <button className="btn btn-primary btn-outline rounded-md shadow-xl" type="submit">Log in</button>
-        }
+        <button
+          className="btn btn-primary btn-outline rounded-md shadow-xl"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? <Loader className='animate-spin mx-auto' size={24} /> : 'Log in'}
+        </button>
       </div>
     </form>
   );

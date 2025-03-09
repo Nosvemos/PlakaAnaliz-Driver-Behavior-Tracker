@@ -7,15 +7,14 @@ export const useCommentStore = create((set, get) => ({
   comments: [],
   isLoading: false,
 
-  sendComment: async (plateId, comment) => {
+  sendComment: async (plate, comment) => {
     set({ isLoading: true });
     try {
       const response = await axiosInstance.post(`/comments`, {
         comment,
-        plateId
+        plate
       });
 
-      // Correctly add the new comment to the existing comments array
       set({
         comments: [...get().comments, response.data.data]
       });
@@ -60,10 +59,8 @@ export const useCommentStore = create((set, get) => ({
         comment
       });
 
-      // Make sure we're preserving all the data from the response
       const updatedComment = response.data.data;
 
-      // Update the comment in the comments array, maintaining all fields
       set({
         comments: get().comments.map(c =>
           c._id === commentId ? updatedComment : c

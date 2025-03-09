@@ -1,15 +1,14 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import PlateInput from './PlateInput.jsx'
 import { validatePlate } from '../../utils/plateUtils.js'
-import { usePlateStore } from '../../store/usePlateStore.js'
-import { Navigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 const PlateForm = () => {
   const [input, setInput] = useState('');
   const [error, setError] = useState('');
   const [formattedPlate, setFormattedPlate] = useState('');
-  const { findPlate } = usePlateStore();
+
   const navigate = useNavigate();
 
   useEffect(() => {

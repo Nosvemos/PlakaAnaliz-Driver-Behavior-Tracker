@@ -1,14 +1,34 @@
 import Layout from '../components/Layout.jsx'
 import PlateInput from '../components/forms/PlateInput.jsx'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import PlateComments from '../components/PlateComments.jsx'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { usePlateStore } from '../store/usePlateStore.js'
 import Loading from '../components/Loading.jsx'
+import { validatePlate } from '../utils/plateUtils.js'
+import { toast } from 'react-toastify'
 
 const PlatePage = () => {
+  const navigate = useNavigate();
   const { plate } = useParams();
+  const [error, setError] = useState('');
   const { findPlate, plateData, isLoading } = usePlateStore();
+
+  useEffect(() => {
+    const { error: validationError } = validatePlate(plate);
+    setError(validationError);
+
+    if (!validationError) {
+      findPlate(plate);
+    }
+  }, [plate, findPlate]);
+
+  useEffect(() => {
+    if (error) {
+      navigate('/');
+      toast.error('Invalid plate format.')
+    }
+  }, [error, navigate]);
 
   const beautifiedPlate = useMemo(() => {
     return plate
@@ -16,13 +36,7 @@ const PlatePage = () => {
     .replace(/(\d+)([A-Za-z]+)/g, '$1 $2')
   }, [plate]);
 
-  useEffect(() => {
-    findPlate(plate);
-  }, [findPlate, plate]);
-
-  if(isLoading) return (
-    <Loading></Loading>
-  );
+  if (isLoading && !error) return <Loading />;
 
   return (
     <Layout>
