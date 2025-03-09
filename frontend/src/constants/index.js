@@ -32,3 +32,5 @@ export const index = [
   "nord",
   "sunset",
 ];
+
+export const brandName = 'PlakaAnaliz'
