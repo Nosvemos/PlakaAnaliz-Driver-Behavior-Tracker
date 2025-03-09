@@ -35,7 +35,7 @@ export const useCommentStore = create((set, get) => ({
   },
 
   getComments: async (plateId) => {
-    set({ isLoading: true });
+    set({ comments: [], isLoading: true });
     try {
       const response = await axiosInstance.get(`/comments/plate/${plateId}`);
       set({ comments: response.data.data || [] });
