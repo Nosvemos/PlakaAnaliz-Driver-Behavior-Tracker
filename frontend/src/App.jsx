@@ -9,7 +9,7 @@ import ThemePage from './pages/ThemePage.jsx'
 import PlatePage from './pages/PlatePage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 
-import Loading from './components/Loading.jsx'
+import Loading from './components/common/Loading.jsx'
 
 import { useAuthStore } from "./store/useAuthStore.js";
 import { useThemeStore } from "./store/useThemeStore.js";

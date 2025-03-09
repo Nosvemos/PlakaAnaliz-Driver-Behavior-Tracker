@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import React from 'react'
 
-const Card = ({ Title, children, Span1, Link1, LinkText1, Span2, Link2, LinkText2, Form }) => {
+const FormCard = ({ Title, children, Span1, Link1, LinkText1, Span2, Link2, LinkText2, Form }) => {
   return (
     <div className="card card-border w-full max-w-md rounded-xl shadow-md px-10">
       <div className="card-body items-center text-center">
@@ -30,4 +30,4 @@ const Card = ({ Title, children, Span1, Link1, LinkText1, Span2, Link2, LinkText
   );
 }
 
-export default Card;
+export default FormCard;

@@ -1,29 +1,24 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Loader } from 'lucide-react';
 
-import FormInput from './FormInput.jsx';
+import FormInput from './inputs/FormInput.jsx';
 
-import { useAuthStore } from "../../store/useAuthStore";
+import { useAuthStore } from "../../store/useAuthStore.js";
 
 const LoginForm = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const { login, isLoading } = useAuthStore();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
       await login(formData.email, formData.password);
     } catch (error) {
@@ -34,41 +29,35 @@ const LoginForm = () => {
   return (
     <form className="w-full" onSubmit={handleLogin}>
       <FormInput
-        icon={<Mail/>}
-        type="email"
-        name="email"
-        placeholder="Email Address"
-        required='required'
-        validatorHint='Enter valid email address.'
-        validatorHidden='hidden'
+        icon={<Mail size={20} />}
+        type='email'
+        name='email'
+        placeholder='Email Address'
+        required
+        validatorHint='Enter a valid email address.'
         onChange={handleChange}
         disabled={isLoading}
       />
-
       <FormInput
-        icon={<Lock/>}
-        type="password"
-        name="password"
-        placeholder="Password"
+        icon={<Lock size={20} />}
+        type='password'
+        name='password'
+        placeholder='Password'
         minLength='6'
-        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-zğüşıöçĞÜŞİÖÇ\d@$!%*?&]{6,}$"
-        required='required'
-        title="Password must be at least 6 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)."
-        validatorHint='Enter valid password.'
-        validatorHidden='hidden'
+        pattern='^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-zğüşıöçĞÜŞİÖÇ\d@$!%*?&]{6,}$'
+        required
+        title='Password must be at least 6 characters long and contain an uppercase letter, a lowercase letter, a number, and a special character (@$!%*?&).'
+        validatorHint='Enter a valid password.'
         onChange={handleChange}
         disabled={isLoading}
       />
-
-      <div className="form-control pt-6">
-        <button
-          className="btn btn-primary btn-outline rounded-md shadow-xl"
-          type="submit"
-          disabled={isLoading}
-        >
-          {isLoading ? <Loader className='animate-spin mx-auto' size={24} /> : 'Log in'}
-        </button>
-      </div>
+      <button
+        className="btn btn-primary btn-outline rounded-md shadow-xl"
+        type="submit"
+        disabled={isLoading}
+      >
+        {isLoading ? <Loader className='animate-spin mx-auto' size={24} /> : 'Log in'}
+      </button>
     </form>
   );
 };

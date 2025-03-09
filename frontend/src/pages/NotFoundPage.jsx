@@ -1,6 +1,6 @@
 import { CircleAlert } from 'lucide-react'
 import { Link } from "react-router-dom";
-import Layout from '../components/Layout.jsx'
+import Layout from '../components/common/Layout.jsx'
 
 const NotFoundPage = () => {
   return (

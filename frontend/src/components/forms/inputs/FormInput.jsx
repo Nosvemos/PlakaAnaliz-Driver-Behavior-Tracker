@@ -2,7 +2,7 @@ import React from 'react';
 
 const FormInput = ({ icon, type, name, placeholder, value, onChange, pattern, title, minLength, maxLength, required, disabled, validatorHidden, validatorHint }) => {
   return (
-    <div className="form-control py-4">
+    <div className="form-control py-1">
       <label className="input validator shadow-md text-sm">
         {icon}
         <input

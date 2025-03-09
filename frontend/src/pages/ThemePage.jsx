@@ -1,6 +1,6 @@
-import { themes } from '../constants/index.js'
+import { index } from '../constants/index.js'
 import { useThemeStore } from "../store/useThemeStore";
-import Layout from '../components/Layout';
+import Layout from '../components/common/Layout.jsx';
 
 const ThemePage = () => {
   const { theme, setTheme } = useThemeStore();
@@ -12,7 +12,7 @@ const ThemePage = () => {
       </div>
 
       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4 pt-4">
-        {themes.map((t) => (
+        {index.map((t) => (
           <button key={t} className={`group flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors
             ${theme === t ? "bg-base-200" : "hover:bg-base-200/50"}`}
             onClick={() => setTheme(t)}

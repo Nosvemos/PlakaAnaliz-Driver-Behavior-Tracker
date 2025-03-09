@@ -1,4 +1,4 @@
-export const themes = [
+export const index = [
   "light",
   "dark",
   "cupcake",

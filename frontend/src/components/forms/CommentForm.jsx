@@ -1,41 +1,20 @@
-import { Link, useParams } from 'react-router-dom'
-import React, { useEffect, useRef, useState } from 'react'
-import { Loader } from 'lucide-react'
-import { useCommentStore } from '../../store/useCommentStore.js'
-import { validatePlate } from '../../utils/plateUtils.js'
-import { toast } from 'react-toastify'
-import EmojiPicker from 'emoji-picker-react';
-import { Smile } from 'lucide-react'
+import { Link, useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Loader } from 'lucide-react';
+import { useCommentStore } from '../../store/useCommentStore.js';
+import { validatePlate } from '../../utils/validators/plateValidator.js';
+import { toast } from 'react-toastify';
+import EmojiPickerButton from '../common/EmojiPickerButton.jsx';
 
-const CommentForm = ({plateData}) => {
+const CommentForm = ({ plateData }) => {
   const [formData, setFormData] = useState({
     comment: '',
     agreeChecked: false
   });
 
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const emojiPickerRef = useRef(null);
-  const { plate } = useParams();
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if(emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
-        setShowEmojiPicker(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleEmojiClick = (emojiObject) => {
-    setFormData(prev => ({
-      ...prev,
-      comment: prev.comment + emojiObject.emoji
-    }));
-  };
-
   const [submitted, setSubmitted] = useState(false);
   const { isLoading, sendComment } = useCommentStore();
+  const { plate } = useParams();
 
   const handleChange = (e) => {
     if (submitted) {
@@ -47,14 +26,21 @@ const CommentForm = ({plateData}) => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-  }
+  };
+
+  const handleEmojiSelect = (emoji) => {
+    setFormData(prev => ({
+      ...prev,
+      comment: prev.comment + emoji
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const { error: validationError } = validatePlate(plate);
     if (validationError) {
-      toast.error('Invalid plate form.');
+      toast.error('Invalid home form.');
       return;
     }
 
@@ -92,26 +78,7 @@ const CommentForm = ({plateData}) => {
             required
           />
 
-          <button
-            type="button"
-            className="absolute bottom-2 right-2 p-1 hover:bg-gray-100 rounded"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          >
-            <Smile size={20} className="text-gray-400" />
-          </button>
-
-          {showEmojiPicker && (
-            <div
-              className="absolute top-full right-0 z-10 mt-2"
-              ref={emojiPickerRef}
-            >
-              <EmojiPicker
-                onEmojiClick={handleEmojiClick}
-                searchDisabled
-                skinTonesDisabled
-              />
-            </div>
-          )}
+          <EmojiPickerButton onEmojiSelect={handleEmojiSelect} />
         </div>
 
         {showValidation() && (
@@ -148,7 +115,7 @@ const CommentForm = ({plateData}) => {
         </div>
       </fieldset>
     </form>
-  )
-}
+  );
+};
 
 export default CommentForm;
