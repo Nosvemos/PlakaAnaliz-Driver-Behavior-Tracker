@@ -1,15 +1,43 @@
-import { ArrowDown01, ArrowDown10, MessageCircle, Trash2, Edit, Save, X } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import {
+  ArrowDown01,
+  ArrowDown10,
+  MessageCircle,
+  Trash2,
+  Edit,
+  Save,
+  X,
+  Smile,
+} from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
 import CommentForm from './forms/CommentForm.jsx'
 import Loading from './Loading.jsx'
 import { useCommentStore } from '../store/useCommentStore.js'
 import { useAuthStore } from '../store/useAuthStore.js'
+import EmojiPicker from 'emoji-picker-react'
 
 const PlateComments = ({ plateData }) => {
   const { getComments, comments, isLoading, deleteComment, updateComment } = useCommentStore();
   const { user, isAuthenticated } = useAuthStore();
+
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editText, setEditText] = useState('');
+
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if(emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleEmojiClick = (emojiObject) => {
+    setEditText(editText + emojiObject.emoji);
+  };
 
   useEffect(() => {
     if (plateData && plateData._id) {
@@ -21,6 +49,10 @@ const PlateComments = ({ plateData }) => {
     setEditingCommentId(comment._id);
     setEditText(comment.comment);
   };
+
+  const handleChange = (e) => {
+    setEditText(e.target.value);
+  }
 
   const handleCancelEdit = () => {
     setEditingCommentId(null);
@@ -87,14 +119,37 @@ const PlateComments = ({ plateData }) => {
                       {new Date(comment.createdAt) < new Date(comment.updatedAt) ? `Edited ${new Date(comment.createdAt).toLocaleDateString()}` : new Date(comment.createdAt).toLocaleDateString() }
                     </div>
                   </div>
-                  <textarea
-                    className="textarea min-w-full p-2 mb-2 rounded-md text-base-content/80"
-                    value={editText}
-                    minLength={10}
-                    maxLength={300}
-                    onChange={(e) => setEditText(e.target.value)}
-                    rows={3} required={true}
-                  />
+                  <div className="relative">
+                    <textarea
+                      className="textarea min-w-full p-2 mb-2 rounded-md text-base-content/80 pr-10 emoji-font-support"
+                      value={editText}
+                      minLength={10}
+                      maxLength={300}
+                      onChange={handleChange}
+                      rows={3} required={true}
+                    />
+
+                    <button
+                      type="button"
+                      className="absolute bottom-3 right-2 p-1 hover:bg-gray-100 rounded"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      <Smile size={20} className="text-gray-400" />
+                    </button>
+
+                    {showEmojiPicker && (
+                      <div
+                        className="absolute top-full right-0 z-10 mt-2"
+                        ref={emojiPickerRef}
+                      >
+                        <EmojiPicker
+                          onEmojiClick={handleEmojiClick}
+                          searchDisabled
+                          skinTonesDisabled
+                        />
+                      </div>
+                    )}
+                  </div>
                   {showValidation() && (
                     <div className="text-error text-xs">Comment must be longer than 10 and shorter than 300 characters.</div>
                   )}
@@ -144,7 +199,7 @@ const PlateComments = ({ plateData }) => {
                       </div>
                     )}
                   </div>
-                  <p className="text-base-content/80">{comment.comment}</p>
+                  <p className="text-base-content/80 emoji-font-support">{comment.comment}</p>
                 </>
               )}
             </div>

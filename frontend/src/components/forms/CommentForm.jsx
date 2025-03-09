@@ -1,9 +1,11 @@
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import React, { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import React, { useEffect, useRef, useState } from 'react'
 import { Loader } from 'lucide-react'
 import { useCommentStore } from '../../store/useCommentStore.js'
 import { validatePlate } from '../../utils/plateUtils.js'
 import { toast } from 'react-toastify'
+import EmojiPicker from 'emoji-picker-react';
+import { Smile } from 'lucide-react'
 
 const CommentForm = ({plateData}) => {
   const [formData, setFormData] = useState({
@@ -11,7 +13,26 @@ const CommentForm = ({plateData}) => {
     agreeChecked: false
   });
 
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef(null);
   const { plate } = useParams();
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if(emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleEmojiClick = (emojiObject) => {
+    setFormData(prev => ({
+      ...prev,
+      comment: prev.comment + emojiObject.emoji
+    }));
+  };
 
   const [submitted, setSubmitted] = useState(false);
   const { isLoading, sendComment } = useCommentStore();
@@ -59,16 +80,39 @@ const CommentForm = ({plateData}) => {
   return (
     <form onSubmit={handleSubmit}>
       <fieldset className="fieldset">
-        <textarea
-          className="textarea h-24 min-w-full"
-          placeholder="Write your comment..."
-          name='comment'
-          value={formData.comment}
-          minLength={10}
-          maxLength={300}
-          onChange={handleChange}
-          required
-        />
+        <div className="relative">
+          <textarea
+            className="textarea h-24 min-w-full pr-10 emoji-font-support"
+            placeholder="Write your comment..."
+            name='comment'
+            value={formData.comment}
+            minLength={10}
+            maxLength={300}
+            onChange={handleChange}
+            required
+          />
+
+          <button
+            type="button"
+            className="absolute bottom-2 right-2 p-1 hover:bg-gray-100 rounded"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          >
+            <Smile size={20} className="text-gray-400" />
+          </button>
+
+          {showEmojiPicker && (
+            <div
+              className="absolute top-full right-0 z-10 mt-2"
+              ref={emojiPickerRef}
+            >
+              <EmojiPicker
+                onEmojiClick={handleEmojiClick}
+                searchDisabled
+                skinTonesDisabled
+              />
+            </div>
+          )}
+        </div>
 
         {showValidation() && (
           <div className="text-error">Comment must be longer than 10 and shorter than 300 characters.</div>
