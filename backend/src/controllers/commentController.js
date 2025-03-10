@@ -5,8 +5,11 @@ import { User } from '../models/User.js';
 
 import errorResponse from '../utils/errorResponse.js'
 
+import cloudinary from "../lib/cloudinary.js";
+import { getPublicIdFromUrl } from '../utils/getPublicIDFromUrl.js'
+
 export const createComment = async (req, res, next) => {
-  const { plate, comment, imageUrl } = req.body;
+  const { plate, comment, image } = req.body;
   const userId = req?.userId;
 
   try {
@@ -21,6 +24,16 @@ export const createComment = async (req, res, next) => {
       writerData = await User.findById(userId);
       if (!writerData) {
         return next(new errorResponse('User can not be found.', 404));
+      }
+    }
+
+    let imageUrl;
+    if (image) {
+      try {
+        const uploadResponse = await cloudinary.uploader.upload(image);
+        imageUrl = uploadResponse.secure_url;
+      } catch (error) {
+        return res.status(400).json({ error: "Failed to upload image." });
       }
     }
 
@@ -54,7 +67,7 @@ export const createComment = async (req, res, next) => {
 };
 
 export const updateComment = async (req, res, next) => {
-  const { comment, imageUrl } = req.body;
+  const { comment, image } = req.body;
   const { commentId } = req.params;
   const userId = req?.userId;
 
@@ -73,11 +86,23 @@ export const updateComment = async (req, res, next) => {
     }
 
     commentData.comment = comment;
-    commentData.imageUrl = imageUrl;
+
+    const publicId = getPublicIdFromUrl(commentData.imageUrl);
+    await cloudinary.uploader.destroy(publicId);
+
+    if (image) {
+      try {
+        const uploadResponse = await cloudinary.uploader.upload(image);
+        commentData.imageUrl = uploadResponse.secure_url;
+      } catch (error) {
+        return res.status(400).json({ error: "Failed to upload image." });
+      }
+    } else {
+      commentData.imageUrl = null;
+    }
 
     await commentData.save();
 
-    // Populate the writer information before sending the response
     const populatedComment = await Comment.findById(commentId)
     .populate("writer", "username");
 
@@ -108,6 +133,11 @@ export const deleteComment = async (req, res, next) => {
 
     if (comment.writer && (comment.writer._id.toString() !== userId?.toString())) {
       return next(new errorResponse('You dont have permission to edit this.', 403));
+    }
+
+    if(comment.imageUrl) {
+      const publicId = getPublicIdFromUrl(comment.imageUrl);
+      await cloudinary.uploader.destroy(publicId)
     }
 
     await Comment.findByIdAndDelete(commentId);

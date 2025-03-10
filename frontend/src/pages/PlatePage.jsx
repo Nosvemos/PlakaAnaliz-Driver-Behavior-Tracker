@@ -10,7 +10,8 @@ import PlateDisplay from '../components/home/PlateDisplay.jsx';
 
 const PlatePage = () => {
   const navigate = useNavigate();
-  const { plate } = useParams();
+  let { plate } = useParams();
+  plate = plate.toUpperCase()
   const [error, setError] = useState('');
   const { findPlate, plateData, isLoading } = usePlateStore();
 
@@ -26,7 +27,7 @@ const PlatePage = () => {
   useEffect(() => {
     if (error) {
       navigate('/');
-      toast.error('Invalid home format.');
+      toast.error('Invalid plate format.');
     }
   }, [error, navigate]);
 

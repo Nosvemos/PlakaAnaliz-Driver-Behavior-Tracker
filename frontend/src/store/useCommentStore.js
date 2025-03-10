@@ -7,12 +7,13 @@ export const useCommentStore = create((set, get) => ({
   comments: [],
   isLoading: false,
 
-  sendComment: async (plate, comment) => {
+  sendComment: async (plate, comment, image) => {
     set({ isLoading: true });
     try {
       const response = await axiosInstance.post(`/comments`, {
+        plate,
         comment,
-        plate
+        image
       });
 
       set({
@@ -52,11 +53,12 @@ export const useCommentStore = create((set, get) => ({
     }
   },
 
-  updateComment: async (commentId, comment) => {
+  updateComment: async (commentId, comment, image) => {
     set({ isLoading: true });
     try {
       const response = await axiosInstance.patch(`/comments/${commentId}`, {
-        comment
+        comment,
+        image
       });
 
       const updatedComment = response.data.data;

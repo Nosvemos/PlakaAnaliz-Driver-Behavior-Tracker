@@ -9,12 +9,27 @@ export const createCommentValidation = [
   .isLength({ min: 10, max: 500 }).withMessage("Comment must be between 10 and 500 characters.")
   .customSanitizer((value) => xss(value)),
 
-  // ImageURl Validation
-  body("imageUrl")
+  // Image Validation
+  body("image")
   .optional()
-  .trim()
-  .isURL({ require_protocol: true }).withMessage("Image URL must be a valid URL starting with http:// or https://")
-  .matches(/\.(jpg|jpeg|png|gif)$/i).withMessage("Image URL must end with .jpg, .jpeg, .png, or .gif."),
+  .custom((value, { req }) => {
+    if (!req.files || !req.files.image) {
+      return true;
+    }
+
+    const file = req.files.image;
+
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      throw new Error("Image size must not exceed 10MB");
+    }
+
+    const validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+    if (!validMimeTypes.includes(file.mimetype)) {
+      throw new Error("Image must be a valid image file (jpg, jpeg, png, or gif)");
+    }
+    return true;
+  }),
 
   // Plate Validation
   body('plate')
@@ -33,12 +48,27 @@ export const updateCommentValidation = [
   .isMongoId().withMessage("Invalid commentId format.")
   .customSanitizer((value) => xss(value)),
 
-  // ImageURl Validation
-  body("imageUrl")
+  // Image Validation
+  body("image")
   .optional()
-  .trim()
-  .isURL({ require_protocol: true }).withMessage("Image URL must be a valid URL starting with http:// or https://")
-  .matches(/\.(jpg|jpeg|png|gif)$/i).withMessage("Image URL must end with .jpg, .jpeg, .png, or .gif."),
+  .custom((value, { req }) => {
+    if (!req.files || !req.files.image) {
+      return true;
+    }
+
+    const file = req.files.image;
+
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      throw new Error("Image size must not exceed 10MB");
+    }
+
+    const validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+    if (!validMimeTypes.includes(file.mimetype)) {
+      throw new Error("Image must be a valid image file (jpg, jpeg, png, or gif)");
+    }
+    return true;
+  }),
 
   // Comment Validation
   body("comment")

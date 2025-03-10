@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
-import React, { useState } from 'react';
-import { Loader } from 'lucide-react';
+import React, { useRef, useState } from 'react'
+import { Loader, Image, X } from 'lucide-react';
 import { useCommentStore } from '../../store/useCommentStore.js';
 import { validatePlate } from '../../utils/validators/plateValidator.js';
 import { toast } from 'react-toastify';
@@ -14,7 +14,26 @@ const CommentForm = ({ plateData }) => {
 
   const [submitted, setSubmitted] = useState(false);
   const { isLoading, sendComment } = useCommentStore();
-  const { plate } = useParams();
+  let { plate } = useParams();
+  plate = plate.toUpperCase()
+
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const handleChange = (e) => {
     if (submitted) {
@@ -40,7 +59,7 @@ const CommentForm = ({ plateData }) => {
 
     const { error: validationError } = validatePlate(plate);
     if (validationError) {
-      toast.error('Invalid home form.');
+      toast.error('Invalid plate form.');
       return;
     }
 
@@ -50,8 +69,9 @@ const CommentForm = ({ plateData }) => {
     }
 
     try {
-      await sendComment(plateData.plate, formData.comment);
+      await sendComment(plateData.plate, formData.comment, imagePreview);
       setFormData({ comment: '', agreeChecked: false });
+      removeImage();
     } catch (err) {
       toast.error('Failed to send comment.');
     }
@@ -66,9 +86,21 @@ const CommentForm = ({ plateData }) => {
   return (
     <form onSubmit={handleSubmit}>
       <fieldset className="fieldset">
+        {imagePreview && (
+          <div className="mb-3 flex items-center gap-2">
+            <div className="relative">
+              <img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-lg border border-zinc-700"/>
+              <button onClick={removeImage}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center"
+                      type="button">
+                <X className="size-3" />
+              </button>
+            </div>
+          </div>
+        )}
         <div className="relative">
           <textarea
-            className="textarea h-24 min-w-full pr-10 emoji-font-support"
+            className="textarea h-24 min-w-full pb-12 emoji-font-support"
             placeholder="Write your comment..."
             name='comment'
             value={formData.comment}
@@ -78,7 +110,24 @@ const CommentForm = ({ plateData }) => {
             required
           />
 
-          <EmojiPickerButton onEmojiSelect={handleEmojiSelect} />
+          <button
+            type="button"
+            className={`absolute bottom-2.25 right-12 btn btn-sm btn-circle ${imagePreview ? "text-primary" : "text-base-content/30"}`}
+            onClick={() => fileInputRef.current?.click()} >
+            <Image size={20} />
+          </button>
+
+          <div className="absolute bottom-1 right-2">
+            <EmojiPickerButton onEmojiSelect={handleEmojiSelect} size={16} />
+          </div>
+
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+          />
         </div>
 
         {showValidation() && (
