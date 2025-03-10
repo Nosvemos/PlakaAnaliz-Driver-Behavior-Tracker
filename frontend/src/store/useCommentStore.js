@@ -104,5 +104,53 @@ export const useCommentStore = create((set, get) => ({
     } finally {
       set({ isLoading: false });
     }
+  },
+
+  addReaction: async (commentId, reactionType) => {
+    try {
+      const response = await axiosInstance.post(`/comments/${commentId}/reactions`, {
+        reactionType
+      });
+
+      const updatedComment = response.data.data;
+
+      set({
+        comments: get().comments.map(c =>
+          c._id === commentId ? updatedComment : c
+        )
+      });
+
+      return true;
+    } catch (error) {
+      if (Array.isArray(error.response?.data?.errors) && error.response.data.errors.length > 0) {
+        toast.error(error.response.data.errors[0]);
+      } else {
+        toast.error(error.response?.data?.message || 'Unexpected error occurred.');
+      }
+      return false;
+    }
+  },
+
+  deleteReaction: async (commentId) => {
+    try {
+      const response = await axiosInstance.delete(`/comments/${commentId}/reactions`);
+
+      const updatedComment = response.data.data;
+
+      set({
+        comments: get().comments.map(c =>
+          c._id === commentId ? updatedComment : c
+        )
+      });
+
+      return true;
+    } catch (error) {
+      if (Array.isArray(error.response?.data?.errors) && error.response.data.errors.length > 0) {
+        toast.error(error.response.data.errors[0]);
+      } else {
+        toast.error(error.response?.data?.message || 'Unexpected error occurred.');
+      }
+      return false;
+    }
   }
 }));

@@ -14,6 +14,6 @@ router.post('/', requestLimiter, createPlateValidation, validateRequest, createP
 
 router.get('/:plate', findPlateValidation, validateRequest, findPlate);
 
-router.delete('/:plate', requestLimiter, deletePlateValidation, validateRequest, deletePlate);
+// router.delete('/:plate', requestLimiter, deletePlateValidation, validateRequest, deletePlate); //TODO No need for now
 
 export default router;

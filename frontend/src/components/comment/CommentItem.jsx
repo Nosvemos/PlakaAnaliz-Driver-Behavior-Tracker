@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { Edit, Trash2, Save, X, Smile, Image } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react';
+import { Edit, Trash2, Save, X, Smile, Image, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useCommentStore } from '../../store/useCommentStore.js';
 import EmojiPicker from 'emoji-picker-react';
 
 const CommentItem = ({ comment }) => {
   const { user, isAuthenticated } = useAuthStore();
-  const { updateComment, deleteComment } = useCommentStore();
+  const { updateComment, deleteComment, addReaction, deleteReaction } = useCommentStore();
 
   const [editingComment, setEditingComment] = useState(false);
   const [editText, setEditText] = useState(comment.comment);
@@ -64,19 +64,59 @@ const CommentItem = ({ comment }) => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const getUserReaction = () => {
+    if (!user || !isAuthenticated) return null;
+    return comment.reactions.find(reaction => reaction.user.toString() === user?._id);
+  };
+
+  const userReaction = getUserReaction();
+  const hasLiked = userReaction?.reactionType === 'like';
+  const hasDisliked = userReaction?.reactionType === 'dislike';
+
+  const handleReaction = async (reactionType) => {
+    if (!user || !isAuthenticated) return;
+
+    try {
+      if ((reactionType === 'like' && hasLiked) || (reactionType === 'dislike' && hasDisliked)) {
+        await deleteReaction(comment._id);
+      } else {
+        await addReaction(comment._id, reactionType);
+      }
+    } catch (error) {
+      console.error('Reaction error:', error);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if(emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
         setShowEmojiPicker(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const showValidation = () => {
     return editText.length > 0 && (editText.length < 10 || editText.length > 300);
   };
+
+  const calculateReactions = (reactions) => {
+    let likeCount = 0;
+    let dislikeCount = 0;
+
+    reactions.forEach((reaction) => {
+      if (reaction.reactionType === 'like') {
+        likeCount++;
+      } else if (reaction.reactionType === 'dislike') {
+        dislikeCount++;
+      }
+    });
+
+    return { likeCount, dislikeCount };
+  };
+
+  const { likeCount, dislikeCount } = calculateReactions(comment.reactions);
 
   return (
     <div className="p-4 border border-base-content/20 rounded-lg">
@@ -94,10 +134,12 @@ const CommentItem = ({ comment }) => {
           {imagePreview && (
             <div className="mb-3 flex items-center gap-2">
               <div className="relative">
-                <img src={imagePreview} alt="image" className="w-20 h-20 object-cover rounded-lg border border-zinc-700"/>
-                <button onClick={removeImage}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center"
-                        type="button">
+                <img src={imagePreview} alt="image" className="w-20 h-20 object-cover rounded-lg border border-zinc-700" />
+                <button
+                  onClick={removeImage}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center"
+                  type="button"
+                >
                   <X className="size-3" />
                 </button>
               </div>
@@ -116,18 +158,15 @@ const CommentItem = ({ comment }) => {
 
             <button
               type="button"
-              className={`absolute bottom-2.25 right-10 btn btn-sm btn-circle ${imagePreview ? "text-primary" : "text-base-content/30"}`}
-              onClick={() => fileInputRef.current?.click()} >
+              className={`absolute bottom-2.25 right-10 btn btn-sm btn-circle ${
+                imagePreview ? 'text-primary' : 'text-base-content/30'
+              }`}
+              onClick={() => fileInputRef.current?.click()}
+            >
               <Image size={20} />
             </button>
 
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={handleImageChange}
-            />
+            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
 
             <button
               type="button"
@@ -138,22 +177,13 @@ const CommentItem = ({ comment }) => {
             </button>
 
             {showEmojiPicker && (
-              <div
-                className="absolute top-full right-0 z-10 mt-2"
-                ref={emojiPickerRef}
-              >
-                <EmojiPicker
-                  onEmojiClick={handleEmojiClick}
-                  searchDisabled
-                  skinTonesDisabled
-                />
+              <div className="absolute top-full right-0 z-10 mt-2" ref={emojiPickerRef}>
+                <EmojiPicker onEmojiClick={handleEmojiClick} searchDisabled skinTonesDisabled />
               </div>
             )}
           </div>
           {showValidation() && (
-            <div className="text-error text-xs">
-              Comment must be longer than 10 and shorter than 300 characters.
-            </div>
+            <div className="text-error text-xs">Comment must be longer than 10 and shorter than 300 characters.</div>
           )}
           <div className="flex justify-end gap-2">
             <button
@@ -205,9 +235,34 @@ const CommentItem = ({ comment }) => {
               </div>
             )}
           </div>
-          { comment.imageUrl && <img className='h-48 my-4' src={comment.imageUrl} alt='image'/>
-          }
+          {comment.imageUrl && <img className="h-48 my-4" src={comment.imageUrl} alt="image" />}
           <p className="text-base-content/80 emoji-font-support">{comment.comment}</p>
+          {isAuthenticated && user && (
+            <div className="flex items-center gap-4 mt-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleReaction('like')}
+                  className={`rounded-full hover:opacity-80 ${
+                    hasLiked ? 'text-primary' : 'text-base-content'
+                  }`}
+                >
+                  <ThumbsUp className="size-4" />
+                </button>
+                <span>{likeCount}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleReaction('dislike')}
+                  className={`rounded-full hover:opacity-80 ${
+                    hasDisliked ? 'text-primary' : 'text-base-content'
+                  }`}
+                >
+                  <ThumbsDown className="size-4" />
+                </button>
+                <span>{dislikeCount}</span>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

@@ -104,3 +104,28 @@ export const commentResponsesValidation = [
   .isMongoId().withMessage("Invalid commentId format.")
   .customSanitizer((value) => xss(value)),
 ];
+
+export const commentAddReactionValidation = [
+  // CommentID Validation
+  param("commentId")
+  .trim()
+  .notEmpty().withMessage("commentId is required.")
+  .isMongoId().withMessage("Invalid commentId format.")
+  .customSanitizer((value) => xss(value)),
+
+  // Reaction type Validation
+  body("reactionType")
+  .trim()
+  .notEmpty().withMessage("reactionType is required.")
+  .isIn(["like", "dislike"]).withMessage("reactionType must be either 'like' or 'dislike'.")
+  .customSanitizer((value) => xss(value)),
+];
+
+export const commentDeleteReactionValidation = [
+  // CommentID Validation
+  param("commentId")
+  .trim()
+  .notEmpty().withMessage("commentId is required.")
+  .isMongoId().withMessage("Invalid commentId format.")
+  .customSanitizer((value) => xss(value))
+];

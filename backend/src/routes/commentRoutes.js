@@ -5,7 +5,9 @@ import {
   updateComment,
   deleteComment,
   plateComments,
-  commentResponses
+  commentResponses,
+  commentAddReaction,
+  commentDeleteReaction
 } from '../controllers/commentController.js'
 
 import requestLimiter from '../middlewares/requestLimiter.js';
@@ -16,6 +18,8 @@ import {
   deleteCommentValidation,
   plateCommentsValidation,
   updateCommentValidation,
+  commentAddReactionValidation,
+  commentDeleteReactionValidation
 } from '../middlewares/validators/commentValidators.js'
 import { validateRequest } from '../middlewares/validators/validateRequest.js'
 
@@ -30,5 +34,9 @@ router.delete('/:commentId', requestLimiter, verifyToken, deleteCommentValidatio
 router.get('/plate/:plateId', plateCommentsValidation, validateRequest, plateComments);
 
 router.get('/:commentId/responses', commentResponsesValidation, validateRequest, commentResponses);
+
+router.post('/:commentId/reactions', requestLimiter, verifyToken, commentAddReactionValidation, validateRequest, commentAddReaction);
+
+router.delete('/:commentId/reactions', requestLimiter, verifyToken, commentDeleteReactionValidation, validateRequest, commentDeleteReaction);
 
 export default router;

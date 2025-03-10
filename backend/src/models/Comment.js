@@ -17,6 +17,17 @@ const commentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  reactions: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    reactionType: {
+      type: String,
+      required: true
+    }
+  }],
 }, { timestamps: true });
 
 commentSchema.pre('deleteOne', { document: true, query: false }, async function (next) {

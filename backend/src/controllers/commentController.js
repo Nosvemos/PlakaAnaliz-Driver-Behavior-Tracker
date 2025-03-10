@@ -212,3 +212,84 @@ export const commentResponses = async (req, res, next) => {
     next(error);
   }
 };
+
+export const commentAddReaction = async (req, res, next) => {
+  const { reactionType } = req.body;
+  const { commentId } = req.params;
+  const userId = req?.userId;
+
+  try {
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return next(new errorResponse('Comment can not be found.', 404));
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new errorResponse('User can not found.', 404));
+    }
+
+    const existingReaction = comment.reactions.find(reaction => reaction.user.toString() === userId);
+    if (existingReaction) {
+      return next(new errorResponse('You already reacted to this comment.', 400));
+    }
+
+    await Comment.updateOne(
+      { _id: commentId },
+      { $push: { reactions: { user: userId, reactionType } } },
+      { timestamps: false }
+    );
+
+    const updatedComment = await Comment.findById(commentId)
+    .populate("writer", "username");
+
+    res.status(200).json({
+      success: true,
+      data: updatedComment,
+    });
+
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+export const commentDeleteReaction = async (req, res, next) => {
+  const { commentId } = req.params;
+  const userId = req?.userId;
+
+  try {
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return next(new errorResponse('Comment can not be found.', 404));
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new errorResponse('User can not found.', 404));
+    }
+
+    const existingReaction = comment.reactions.find(reaction => reaction.user.toString() === userId);
+    if (!existingReaction) {
+      return next(new errorResponse('You have not reacted to this comment.', 400));
+    }
+
+    await Comment.updateOne(
+      { _id: commentId },
+      { $pull: { reactions: { user: userId } } },
+      { timestamps: false }
+    );
+
+    const updatedComment = await Comment.findById(commentId)
+    .populate("writer", "username");
+
+    res.status(200).json({
+      success: true,
+      data: updatedComment,
+    });
+
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+}

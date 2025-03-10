@@ -6,7 +6,7 @@ const CommentHeader = ({ commentCount, onSortNewest, onSortOldest }) => {
     <div className='flex flex-row items-stretch justify-center pb-5'>
       <div className='flex-1'>
         <div className="flex items-center gap-1 hover:opacity-80 transition-all">
-          <MessageCircle className='size-5'/>
+          <MessageCircle className='text-primary size-5'/>
           <span className="text-md font-semibold">Comments</span>
           <span>({commentCount})</span>
         </div>
