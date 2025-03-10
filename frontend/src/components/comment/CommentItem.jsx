@@ -147,7 +147,7 @@ const CommentItem = ({ comment }) => {
           )}
           <div className="relative">
             <textarea
-              className="textarea min-w-full p-2 mb-2 rounded-md text-base-content/80 pr-10 emoji-font-support"
+              className="textarea min-w-full p-2 mb-2 rounded-md text-base-content/80 pr-10 emoji-support"
               value={editText}
               minLength={10}
               maxLength={300}
@@ -236,7 +236,7 @@ const CommentItem = ({ comment }) => {
             )}
           </div>
           {comment.imageUrl && <img className="h-48 my-4" src={comment.imageUrl} alt="image" />}
-          <p className="text-base-content/80 emoji-font-support">{comment.comment}</p>
+          <p className="text-base-content/80 emoji-support">{comment.comment}</p>
           {isAuthenticated && user && (
             <div className="flex items-center gap-4 mt-2">
               <div className="flex items-center gap-2">

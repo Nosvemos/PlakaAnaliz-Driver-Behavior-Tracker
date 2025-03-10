@@ -100,7 +100,7 @@ const CommentForm = ({ plateData }) => {
         )}
         <div className="relative">
           <textarea
-            className="textarea h-24 min-w-full pb-12 emoji-font-support"
+            className="textarea h-24 min-w-full pb-12 emoji-support"
             placeholder="Write your comment..."
             name='comment'
             value={formData.comment}
