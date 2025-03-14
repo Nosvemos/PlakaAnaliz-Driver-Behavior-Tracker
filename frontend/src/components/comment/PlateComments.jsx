@@ -6,14 +6,16 @@ import CommentHeader from './CommentHeader.jsx';
 import CommentList from './CommentList.jsx';
 
 const PlateComments = ({ plateData }) => {
-  const { getComments, comments, isLoading } = useCommentStore();
+  const { getComments, resetComments, comments, isLoading } = useCommentStore();
   const [sortOrder, setSortOrder] = useState('newest');
 
   useEffect(() => {
-    if (plateData && plateData._id) {
+    resetComments();
+
+    if (plateData?._id) {
       getComments(plateData._id);
     }
-  }, [getComments, plateData]);
+  }, [resetComments, getComments, plateData]);
 
   const handleSortNewest = () => {
     setSortOrder('newest');

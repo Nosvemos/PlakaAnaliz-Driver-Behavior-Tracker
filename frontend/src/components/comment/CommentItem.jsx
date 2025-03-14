@@ -6,12 +6,15 @@ import EmojiPicker from 'emoji-picker-react';
 
 const CommentItem = ({ comment }) => {
   const { user, isAuthenticated } = useAuthStore();
+
   const { updateComment, deleteComment, addReaction, deleteReaction } = useCommentStore();
 
   const [editingComment, setEditingComment] = useState(false);
   const [editText, setEditText] = useState(comment.comment);
+
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
+
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
 

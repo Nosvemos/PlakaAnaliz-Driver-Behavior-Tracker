@@ -14,10 +14,6 @@ export const createComment = async (req, res, next) => {
 
   try {
     let plateData = await Plate.findOne({plate});
-    if (!plateData) {
-      plateData = new Plate({plate});
-      await plateData.save();
-    }
 
     let writerData = null;
     if (userId) {
@@ -167,15 +163,13 @@ export const plateComments = async (req, res, next) => {
     if (!plateData) {
       return next(new errorResponse('Plate can not be found.', 404));
     }
-    // Find comments and populate writer field with username if it exists
+
     const comments = await Comment.find({plate: plateId})
     .populate("writer", "username");
 
-    // Transform the comments to include username only if writer exists
     const formattedComments = comments.map(comment => {
       const commentObj = comment.toObject();
 
-      // If there's no writer, return the comment without writer field
       if (!comment.writer) {
         delete commentObj.writer;
       }

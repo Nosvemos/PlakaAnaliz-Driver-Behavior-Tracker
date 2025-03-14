@@ -5,6 +5,7 @@ import { useCommentStore } from '../../store/useCommentStore.js';
 import { validatePlate } from '../../utils/validators/plateValidator.js';
 import { toast } from 'react-toastify';
 import EmojiPickerButton from '../common/EmojiPickerButton.jsx';
+import { usePlateStore } from '../../store/usePlateStore.js'
 
 const CommentForm = ({ plateData }) => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,8 @@ const CommentForm = ({ plateData }) => {
 
   const [submitted, setSubmitted] = useState(false);
   const { isLoading, sendComment } = useCommentStore();
+  const { createPlate } = usePlateStore();
+
   let { plate } = useParams();
   plate = plate.toUpperCase()
 
@@ -64,8 +67,7 @@ const CommentForm = ({ plateData }) => {
     }
 
     if (!plateData) {
-      toast.error('Plate not found.');
-      return;
+      plateData = await createPlate(plate);
     }
 
     try {
@@ -73,7 +75,7 @@ const CommentForm = ({ plateData }) => {
       setFormData({ comment: '', agreeChecked: false });
       removeImage();
     } catch (err) {
-      toast.error('Failed to send comment.');
+      toast.error(err.message);
     }
   };
 

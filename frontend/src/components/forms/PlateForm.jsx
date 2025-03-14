@@ -5,11 +5,13 @@ import SearchInstruction from '../home/SearchInstruction.jsx';
 import FormFooter from '../home/FormFooter.jsx';
 import { validatePlate } from '../../utils/validators/plateValidator.js';
 import { toast } from 'react-toastify';
+import { usePlateStore } from '../../store/usePlateStore.js'
 
 const PlateForm = () => {
   const [input, setInput] = useState('');
   const [error, setError] = useState('');
   const [formattedPlate, setFormattedPlate] = useState('');
+  const { resetPlateData } = usePlateStore();
 
   const navigate = useNavigate();
 
@@ -31,10 +33,13 @@ const PlateForm = () => {
   };
 
   const submitForm = async (e) => {
+    const fixedPlate = formattedPlate.replace(/\s+/g, "");
     e.preventDefault();
 
+    resetPlateData();
+
     if(!error) {
-      navigate(`/${formattedPlate.replace(/\s+/g, "")}`)
+      navigate(`/${fixedPlate}`);
     } else {
       toast.error(error);
     }

@@ -53,6 +53,8 @@ export const useCommentStore = create((set, get) => ({
     }
   },
 
+  resetComments: () => set({ comments: []}),
+
   updateComment: async (commentId, comment, image) => {
     set({ isLoading: true });
     try {
