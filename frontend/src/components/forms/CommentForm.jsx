@@ -114,7 +114,7 @@ const CommentForm = ({ plateData }) => {
 
           <button
             type="button"
-            className={`absolute bottom-2.25 right-12 btn btn-sm btn-circle ${imagePreview ? "text-primary" : "text-base-content/30"}`}
+            className={`absolute bottom-2.25 right-12 btn btn-sm border-0 btn-circle ${imagePreview ? "text-primary" : "text-base-content/30"}`}
             onClick={() => fileInputRef.current?.click()} >
             <Image size={20} />
           </button>

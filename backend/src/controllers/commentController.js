@@ -195,7 +195,8 @@ export const commentResponses = async (req, res, next) => {
     if (!commentData) {
       return next(new errorResponse('Comment can not be found.', 404));
     }
-    const responses = await Response.find({comment: commentId});
+    const responses = await Response.find({comment: commentId})
+      .populate("writer", "username");
     return res.status(200).json({
       success: true,
       message: 'Comment response data successfully found.',

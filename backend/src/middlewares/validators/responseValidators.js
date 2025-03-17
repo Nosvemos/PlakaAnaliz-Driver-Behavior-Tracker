@@ -5,7 +5,7 @@ export const createResponseValidation = [
   // Response Validation
   body("response")
   .trim()
-  .notEmpty().withMessage("response is required.")
+  .notEmpty().withMessage("Response is required.")
   .isLength({ min: 10, max: 100 }).withMessage("Response must be between 10 and 100 characters.")
   .customSanitizer((value) => xss(value)),
 
@@ -40,4 +40,29 @@ export const deleteResponseValidation = [
   .notEmpty().withMessage("responseId is required.")
   .isMongoId().withMessage("Invalid responseId format.")
   .customSanitizer((value) => xss(value)),
+];
+
+export const responseAddReactionValidation = [
+  // responseId Validation
+  param("responseId")
+    .trim()
+    .notEmpty().withMessage("responseId is required.")
+    .isMongoId().withMessage("Invalid responseId format.")
+    .customSanitizer((value) => xss(value)),
+
+  // Reaction type Validation
+  body("reactionType")
+    .trim()
+    .notEmpty().withMessage("reactionType is required.")
+    .isIn(["like", "dislike"]).withMessage("reactionType must be either 'like' or 'dislike'.")
+    .customSanitizer((value) => xss(value)),
+];
+
+export const responseDeleteReactionValidation = [
+  // responseId Validation
+  param("responseId")
+    .trim()
+    .notEmpty().withMessage("responseId is required.")
+    .isMongoId().withMessage("Invalid responseId format.")
+    .customSanitizer((value) => xss(value))
 ];

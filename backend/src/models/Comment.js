@@ -17,6 +17,12 @@ const commentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  responses: [{
+    responseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Response'
+    }
+  }],
   reactions: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,

@@ -1,19 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Edit, Trash2, Save, X, Smile, Image, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Edit, Trash2, Save, X, Smile, Image, ThumbsUp, ThumbsDown, Reply, Send } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore.js';
-import { useCommentStore } from '../../store/useCommentStore.js';
+import { useCommentStore } from '../../store/useCommentStore';
+import { useResponseStore } from '../../store/useResponseStore'
 import EmojiPicker from 'emoji-picker-react';
+import ResponseItem from '../response/ResponseItem.jsx'
 
 const CommentItem = ({ comment }) => {
   const { user, isAuthenticated } = useAuthStore();
 
   const { updateComment, deleteComment, addReaction, deleteReaction } = useCommentStore();
 
+  const { responses, getResponses, createResponse } = useResponseStore();
+  const [showResponses, setShowResponses] = useState(false);
+
   const [editingComment, setEditingComment] = useState(false);
   const [editText, setEditText] = useState(comment.comment);
 
+  const [replyMode, setReplyMode] = useState(false);
+  const [replyText, setReplyText] = useState('');
+
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showReplyEmojiPicker, setShowReplyEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
+  const replyEmojiPickerRef = useRef(null);
 
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
@@ -32,19 +42,41 @@ const CommentItem = ({ comment }) => {
     setEditText(editText + emojiObject.emoji);
   };
 
+  const handleReplyEmojiClick = (emojiObject) => {
+    setReplyText(replyText + emojiObject.emoji);
+  };
+
   const handleEditClick = () => {
     setEditingComment(true);
     setEditText(comment.comment);
     setImagePreview(comment.imageUrl);
   };
 
+  const handleReplyClick = () => {
+    if (!isAuthenticated) return;
+    setReplyMode(true);
+    // Close editing mode if it's open
+    if (editingComment) {
+      setEditingComment(false);
+    }
+  };
+
   const handleChange = (e) => {
     setEditText(e.target.value);
+  };
+
+  const handleReplyChange = (e) => {
+    setReplyText(e.target.value);
   };
 
   const handleCancelEdit = () => {
     setEditingComment(false);
     setEditText('');
+  };
+
+  const handleCancelReply = () => {
+    setReplyMode(false);
+    setReplyText('');
   };
 
   const handleSaveEdit = async () => {
@@ -53,6 +85,20 @@ const CommentItem = ({ comment }) => {
     const success = await updateComment(comment._id, editText, imagePreview);
     if (success) {
       setEditingComment(false);
+    }
+  };
+
+  const handleSubmitReply = async () => {
+    if (replyText.trim() === '' || replyText.length < 3) return;
+
+    try {
+      const success = await createResponse(replyText, comment._id);
+      if (success) {
+        setReplyMode(false);
+        setReplyText('');
+      }
+    } catch (error) {
+      console.error('Reply submission error:', error);
     }
   };
 
@@ -95,6 +141,9 @@ const CommentItem = ({ comment }) => {
       if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
         setShowEmojiPicker(false);
       }
+      if (replyEmojiPickerRef.current && !replyEmojiPickerRef.current.contains(e.target)) {
+        setShowReplyEmojiPicker(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -102,6 +151,10 @@ const CommentItem = ({ comment }) => {
 
   const showValidation = () => {
     return editText.length > 0 && (editText.length < 10 || editText.length > 300);
+  };
+
+  const showReplyValidation = () => {
+    return replyText.length > 0 && (replyText.length < 3 || replyText.length > 300);
   };
 
   const calculateReactions = (reactions) => {
@@ -130,7 +183,7 @@ const CommentItem = ({ comment }) => {
             <div className="font-semibold">{comment.writer?.username || 'Anonymous'}</div>
             <div className="text-sm text-base-content/60">
               {new Date(comment.createdAt) < new Date(comment.updatedAt)
-                ? `Edited ${new Date(comment.createdAt).toLocaleDateString()}`
+                ? `Edited ${new Date(comment.updatedAt).toLocaleDateString()}`
                 : new Date(comment.createdAt).toLocaleDateString()}
             </div>
           </div>
@@ -161,7 +214,7 @@ const CommentItem = ({ comment }) => {
 
             <button
               type="button"
-              className={`absolute bottom-2.25 right-10 btn btn-sm btn-circle ${
+              className={`absolute bottom-2.25 right-10 btn btn-sm btn-circle border-0 ${
                 imagePreview ? 'text-primary' : 'text-base-content/30'
               }`}
               onClick={() => fileInputRef.current?.click()}
@@ -191,14 +244,14 @@ const CommentItem = ({ comment }) => {
           <div className="flex justify-end gap-2">
             <button
               onClick={handleCancelEdit}
-              className="flex items-center gap-1 px-3 py-1 text-sm rounded-md hover:opacity-80"
+              className="flex items-center gap-1 px-3 py-1 text-xs rounded-md hover:opacity-80"
             >
               <X className="size-4" />
               <span>Cancel</span>
             </button>
             <button
               onClick={handleSaveEdit}
-              className="flex items-center gap-1 px-3 py-1 text-sm rounded-md hover:opacity-80"
+              className="flex items-center gap-1 px-3 py-1 text-xs rounded-md hover:opacity-80 bg-primary text-primary-content"
               disabled={editText.length < 10 || editText.length > 300}
             >
               <Save className="size-4" />
@@ -214,55 +267,146 @@ const CommentItem = ({ comment }) => {
               <div className="font-semibold">{comment.writer?.username || 'Anonymous'}</div>
               <div className="text-sm text-base-content/60">
                 {new Date(comment.createdAt) < new Date(comment.updatedAt)
-                  ? `Edited ${new Date(comment.createdAt).toLocaleDateString()}`
+                  ? `Edited ${new Date(comment.updatedAt).toLocaleDateString()}`
                   : new Date(comment.createdAt).toLocaleDateString()}
               </div>
             </div>
 
-            {isAuthenticated && comment.writer && user && comment.writer._id === user._id && (
+            {isAuthenticated && (
               <div className="flex items-center gap-2">
                 <button
-                  onClick={handleEditClick}
+                  onClick={handleReplyClick}
                   className="p-1 text-base-content/60 rounded-full hover:opacity-80"
-                  title="Edit comment"
+                  title="Reply to comment"
                 >
-                  <Edit className="size-4" />
+                  <Reply className="size-4" />
                 </button>
-                <button
-                  onClick={handleDeleteComment}
-                  className="p-1 text-base-content/60 rounded-full hover:opacity-80"
-                  title="Delete comment"
-                >
-                  <Trash2 className="size-4" />
-                </button>
+
+                {comment.writer && user && comment.writer._id === user._id && (
+                  <>
+                    <button
+                      onClick={handleEditClick}
+                      className="p-1 text-base-content/60 rounded-full hover:opacity-80"
+                      title="Edit comment"
+                    >
+                      <Edit className="size-4" />
+                    </button>
+                    <button
+                      onClick={handleDeleteComment}
+                      className="p-1 text-base-content/60 rounded-full hover:opacity-80"
+                      title="Delete comment"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
           {comment.imageUrl && <img className="h-48 my-4" src={comment.imageUrl} alt="image" />}
           <p className="text-base-content/80 emoji-support">{comment.comment}</p>
+
           {isAuthenticated && user && (
             <div className="flex items-center gap-4 mt-2">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleReaction('like')}
-                  className={`rounded-full hover:opacity-80 ${
-                    hasLiked ? 'text-primary' : 'text-base-content'
-                  }`}
-                >
-                  <ThumbsUp className="size-4" />
-                </button>
-                <span>{likeCount}</span>
+              <button
+                onClick={() => handleReaction('like')}
+                className={`flex items-center gap-1 rounded-full hover:opacity-80 ${
+                  hasLiked ? 'text-primary' : 'text-base-content'
+                }`}
+              >
+                <ThumbsUp className="size-4" /> {likeCount}
+              </button>
+              <button
+                onClick={() => handleReaction('dislike')}
+                className={`flex items-center gap-1 rounded-full hover:opacity-80 ${
+                  hasDisliked ? 'text-primary' : 'text-base-content'
+                }`}
+              >
+                <ThumbsDown className="size-4" /> {dislikeCount}
+              </button>
+            </div>
+          )}
+
+          {/* Display replies here if you have them in your data model */}
+          {(
+            <div className="mt-2">
+              <button
+                onClick={async () => {
+                  if (!showResponses) await getResponses(comment._id);
+                  setShowResponses(!showResponses);
+                }}
+                className="text-sm text-blue-500 hover:underline"
+              >
+                {showResponses ? 'Hide responses' : `View responses (${responses[comment._id]?.length || 0})`}
+              </button>
+
+              {showResponses && responses[comment._id]?.map(response => (
+                <ResponseItem key={response._id} response={response} />
+              ))}
+
+              {/* Reply form */}
+              {replyMode && (
+                <div className="mt-2 ml-4">
+                  {/* Existing reply form */}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Reply input area */}
+          {replyMode && (
+            <div className="mt-3 pl-4 border-l-2 border-base-content/10 py-2">
+              <div className="text-sm text-base-content/60 mb-2">
+                Replying to {comment.writer?.username || 'Anonymous'}
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="relative">
+                <textarea
+                  className="textarea min-w-full p-2 mb-2 rounded-md bg-base-200 text-base-content/80 pr-10 text-sm emoji-support"
+                  value={replyText}
+                  minLength={10}
+                  maxLength={100}
+                  onChange={handleReplyChange}
+                  rows={2}
+                  placeholder="Write your reply..."
+                  required={true}
+                />
+
                 <button
-                  onClick={() => handleReaction('dislike')}
-                  className={`rounded-full hover:opacity-80 ${
-                    hasDisliked ? 'text-primary' : 'text-base-content'
-                  }`}
+                  type="button"
+                  className="absolute bottom-3 right-2 p-1 hover:bg-gray-100 rounded"
+                  onClick={() => setShowReplyEmojiPicker(!showReplyEmojiPicker)}
                 >
-                  <ThumbsDown className="size-4" />
+                  <Smile size={16} className="text-gray-400" />
                 </button>
-                <span>{dislikeCount}</span>
+
+                {showReplyEmojiPicker && (
+                  <div className="absolute top-full right-0 z-10 mt-2" ref={replyEmojiPickerRef}>
+                    <EmojiPicker onEmojiClick={handleReplyEmojiClick} searchDisabled skinTonesDisabled />
+                  </div>
+                )}
+              </div>
+
+              {showReplyValidation() && (
+                <div className="text-error text-xs">Reply must be longer than 10 and shorter than 100 characters.</div>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={handleCancelReply}
+                  className="flex items-center gap-1 px-3 py-1 text-xs rounded-md hover:opacity-80"
+                >
+                  <X className="size-3" />
+                  <span>Cancel</span>
+                </button>
+                <button
+                  onClick={handleSubmitReply}
+                  className="flex items-center gap-1 px-3 py-1 text-xs bg-primary text-primary-content rounded-md hover:opacity-80"
+                  disabled={replyText.length < 3 || replyText.length > 300}
+                >
+                  <Send className="size-3" />
+                  <span>Reply</span>
+                </button>
               </div>
             </div>
           )}

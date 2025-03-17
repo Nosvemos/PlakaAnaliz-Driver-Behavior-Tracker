@@ -10,7 +10,7 @@ export const createResponse = async (req, res, next) => {
   try {
     const commentData = await Comment.findById(commentId);
     if (!commentData) {
-      return next(new errorResponse('Response can not be found.', 404));
+      return next(new errorResponse('Comment can not be found.', 404));
     }
 
     let writerData = null;
@@ -28,6 +28,10 @@ export const createResponse = async (req, res, next) => {
     });
 
     await newResponse.save();
+
+    if (!commentData.responses) {
+      commentData.responses = [];
+    }
 
     commentData.responses.push(newResponse._id);
     await commentData.save();
@@ -55,7 +59,8 @@ export const updateResponse = async (req, res, next) => {
   const userId = req?.userId;
 
   try {
-    const responseData = await Response.findById(responseId);
+    const responseData = await Response.findById(responseId)
+      .populate("writer", "username");
     if (!responseData) {
       return next(new errorResponse('Response can not be found.', 404));
     }
@@ -111,6 +116,87 @@ export const deleteResponse = async (req, res, next) => {
     return res.status(200).json({
       message: "Response has been deleted successfully.",
       success: true
+    });
+
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+export const responseAddReaction = async (req, res, next) => {
+  const { reactionType } = req.body;
+  const { responseId } = req.params;
+  const userId = req?.userId;
+
+  try {
+    const response = await Response.findById(responseId);
+    if (!response) {
+      return next(new errorResponse('Response can not be found.', 404));
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new errorResponse('User can not found.', 404));
+    }
+
+    const existingReaction = response.reactions.find(reaction => reaction.user.toString() === userId);
+    if (existingReaction) {
+      return next(new errorResponse('You already reacted to this comment.', 400));
+    }
+
+    await Response.updateOne(
+      { _id: responseId },
+      { $push: { reactions: { user: userId, reactionType } } },
+      { timestamps: false }
+    );
+
+    const updatedResponse = await Response.findById(responseId)
+      .populate("writer", "username");
+
+    res.status(200).json({
+      success: true,
+      data: updatedResponse,
+    });
+
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+export const responseDeleteReaction = async (req, res, next) => {
+  const { responseId } = req.params;
+  const userId = req?.userId;
+
+  try {
+    const response = await Response.findById(responseId);
+    if (!response) {
+      return next(new errorResponse('Response can not be found.', 404));
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new errorResponse('User can not found.', 404));
+    }
+
+    const existingReaction = response.reactions.find(reaction => reaction.user.toString() === userId);
+    if (!existingReaction) {
+      return next(new errorResponse('You have not reacted to this comment.', 400));
+    }
+
+    await Response.updateOne(
+      { _id: responseId },
+      { $pull: { reactions: { user: userId } } },
+      { timestamps: false }
+    );
+
+    const updatedResponse = await Response.findById(responseId)
+      .populate("writer", "username");
+
+    res.status(200).json({
+      success: true,
+      data: updatedResponse,
     });
 
   } catch (error) {
