@@ -18,10 +18,8 @@ const commentSchema = new mongoose.Schema({
     ref: 'User'
   },
   responses: [{
-    responseId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Response'
-    }
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Response'
   }],
   reactions: [{
     user: {

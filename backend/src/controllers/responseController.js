@@ -33,8 +33,11 @@ export const createResponse = async (req, res, next) => {
       commentData.responses = [];
     }
 
-    commentData.responses.push(newResponse._id);
-    await commentData.save();
+    await Comment.updateOne(
+      { _id: commentId },
+      { $push: { responses: newResponse._id } },
+      { timestamps: false }
+    );
 
     const populatedResponse = await Response.findById(newResponse._id)
     .populate("writer", "username");
@@ -69,7 +72,7 @@ export const updateResponse = async (req, res, next) => {
       return next(new errorResponse('Anonymous responses can not be edited.', 403));
     }
 
-    if (responseId.writer && (responseId.writer.toString() !== userId?.toString())) {
+    if (responseData.writer && (responseData.writer?._id.toString() !== userId.toString())) {
       return next(new errorResponse('You do not have permission to edit this response.', 403));
     }
 
@@ -98,24 +101,31 @@ export const deleteResponse = async (req, res, next) => {
       return next(new errorResponse('Response can not be found.', 404));
     }
 
+    const commentId = response.comment;
+
     if (!response.writer) {
       return next(new errorResponse('Anonymous responses can not be edited.', 403));
     }
 
-    if (response.writer && (response.writer.toString() !== userId?.toString())) {
+    if (!response.writer || response.writer.toString() !== userId?.toString()) {
       return next(new errorResponse('You dont have permission to delete this response.', 403));
     }
 
-    await Response.findByIdAndDelete(responseId);
-
-    await Comment.findByIdAndUpdate(
-      response.comment,
-      { $pull: { responses: responseId } }
+    await Comment.updateOne(
+      { _id: commentId },
+      { $pull: { responses: responseId } },
+      { timestamps: false }
     );
 
+    await Response.findByIdAndDelete(responseId);
+
     return res.status(200).json({
-      message: "Response has been deleted successfully.",
-      success: true
+      success: true,
+      message: "Response deleted.",
+      data: {
+        commentId: commentId,
+        responseId: responseId
+      }
     });
 
   } catch (error) {

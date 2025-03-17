@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useResponseStore } from '../../store/useResponseStore';
 import EmojiPicker from 'emoji-picker-react';
 
-const ResponseItem = ({ response }) => {
+const ResponseItem = ({ response, onDelete }) => {
   const { user } = useAuthStore();
   const { updateResponse, deleteResponse, addReaction, deleteReaction } = useResponseStore();
 
@@ -28,6 +28,11 @@ const ResponseItem = ({ response }) => {
     } else {
       await addReaction(response._id, type);
     }
+  };
+
+  const handleDelete = async () => {
+    await deleteResponse(response._id);
+    onDelete(); // 👈 Callback'i çağır
   };
 
   // Edit handling
@@ -59,7 +64,7 @@ const ResponseItem = ({ response }) => {
               <Edit className="size-4" />
             </button>
             <button
-              onClick={() => deleteResponse(response._id)}
+              onClick={handleDelete}
               className="p-1 text-base-content/60 rounded-full hover:opacity-80"
               title="Delete response"
             >

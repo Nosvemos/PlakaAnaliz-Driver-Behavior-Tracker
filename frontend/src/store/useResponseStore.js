@@ -45,19 +45,35 @@ export const useResponseStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const res = await axiosInstance.get(`/comments/${commentId}/responses`);
-      set((state) => ({
-        responses: {
-          ...state.responses,
-          [commentId]: res.data.data || []
-        }
-      }));
+
+      const newResponses = res.data?.data || [];
+
+      if (!newResponses.length) {
+        return true;
+      }
+
+      set((state) => {
+        const existingResponses = state.responses[commentId] || [];
+
+        const existingIds = new Set(existingResponses.map(r => r._id));
+        const filteredResponses = newResponses.filter(r => !existingIds.has(r._id));
+
+        if (!filteredResponses.length) return state;
+
+        return {
+          responses: {
+            ...state.responses,
+            [commentId]: [...existingResponses, ...filteredResponses]
+          }
+        };
+      });
+
       return true;
     } catch (error) {
-      if (Array.isArray(error.response?.data?.errors) && error.response.data.errors.length > 0) {
-        toast.error(error.response.data.errors[0]);
-      } else {
-        toast.error(error.response?.data?.message || 'Unexpected error occurred.');
-      }
+      const errorMessage = error.response?.data?.message
+        || error.message
+        || 'Failed to load responses';
+      toast.error(errorMessage);
       return false;
     } finally {
       set({ isLoading: false });
@@ -74,10 +90,10 @@ export const useResponseStore = create((set, get) => ({
       const updated = res.data.data;
 
       set((state) => {
-        const responseCommentId = updated.commentId;
+        const responseCommentId = updated.comment;
 
         if (!state.responses[responseCommentId]) {
-          console.warn(`No responses found for commentId: ${responseCommentId}`);
+          console.warn(`No responses found for comment: ${responseCommentId}`);
           return state;
         }
 
@@ -85,7 +101,7 @@ export const useResponseStore = create((set, get) => ({
           responses: {
             ...state.responses,
             [responseCommentId]: state.responses[responseCommentId].map(r =>
-              r._id === responseId ? updated : r
+              r._id === responseId ? { ...r, ...updated } : r
             )
           }
         };
@@ -109,34 +125,24 @@ export const useResponseStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const res = await axiosInstance.delete(`/responses/${responseId}`);
-      const deleted = res.data.data;
+      const { commentId } = res.data.data;
 
       set((state) => {
-        const responseCommentId = deleted.commentId;
-
-        if (!state.responses[responseCommentId]) {
-          console.warn(`No responses found for commentId: ${responseCommentId}`);
-          return state;
-        }
+        if (!state.responses[commentId]) return state;
 
         return {
           responses: {
             ...state.responses,
-            [responseCommentId]: state.responses[responseCommentId].filter(
-              (r) => r._id !== responseId
-            ),
-          },
+            [commentId]: state.responses[commentId].filter(r => r._id !== responseId)
+          }
         };
       });
 
       toast.success('Response deleted!');
       return true;
     } catch (error) {
-      if (Array.isArray(error.response?.data?.errors) && error.response.data.errors.length > 0) {
-        toast.error(error.response.data.errors[0]);
-      } else {
-        toast.error(error.response?.data?.message || 'Unexpected error occurred.');
-      }
+      const errorMessage = error.response?.data?.message || 'Deletion failed.';
+      toast.error(errorMessage);
       return false;
     } finally {
       set({ isLoading: false });
@@ -145,26 +151,26 @@ export const useResponseStore = create((set, get) => ({
 
   addReaction: async (responseId, reactionType) => {
     try {
-      const res = await axiosInstance.post(`/responses/${responseId}/reactions`, {
-        reactionType,
-      });
+      const res = await axiosInstance.post(`/responses/${responseId}/reactions`, { reactionType });
+      const updated = {
+        ...res.data.data,
+        reactions: res.data.data.reactions
+      };
 
-      const updated = res.data.data;
       set((state) => {
-        const responseCommentId = updated.commentId;
+        const responseCommentId = updated.comment;
 
         if (!state.responses[responseCommentId]) {
-          console.warn(`No responses found for commentId: ${responseCommentId}`);
           return state;
         }
 
         return {
           responses: {
             ...state.responses,
-            [responseCommentId]: state.responses[responseCommentId].map((r) =>
+            [responseCommentId]: state.responses[responseCommentId].map(r =>
               r._id === responseId ? updated : r
-            ),
-          },
+            )
+          }
         };
       });
 
@@ -182,23 +188,25 @@ export const useResponseStore = create((set, get) => ({
   deleteReaction: async (responseId) => {
     try {
       const res = await axiosInstance.delete(`/responses/${responseId}/reactions`);
-      const updated = res.data.data;
+      const updated = {
+        ...res.data.data,
+        reactions: res.data.data.reactions
+      };
 
       set((state) => {
-        const responseCommentId = updated.commentId;
+        const responseCommentId = updated.comment;
 
         if (!state.responses[responseCommentId]) {
-          console.warn(`No responses found for commentId: ${responseCommentId}`);
           return state;
         }
 
         return {
           responses: {
             ...state.responses,
-            [responseCommentId]: state.responses[responseCommentId].map((r) =>
+            [responseCommentId]: state.responses[responseCommentId].map(r =>
               r._id === responseId ? updated : r
-            ),
-          },
+            )
+          }
         };
       });
 
@@ -211,5 +219,5 @@ export const useResponseStore = create((set, get) => ({
       }
       return false;
     }
-  },
+  }
 }));

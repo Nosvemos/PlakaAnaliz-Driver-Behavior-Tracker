@@ -161,30 +161,28 @@ export const plateComments = async (req, res, next) => {
   try {
     const plateData = await Plate.findById(plateId);
     if (!plateData) {
-      return next(new errorResponse('Plate can not be found.', 404));
+      return next(new errorResponse('Plate not found.', 404));
     }
 
-    const comments = await Comment.find({plate: plateId})
-    .populate("writer", "username");
+    const comments = await Comment.find({ plate: plateId })
+      .populate("writer", "username")
+      .lean();
 
-    const formattedComments = comments.map(comment => {
-      const commentObj = comment.toObject();
-
-      if (!comment.writer) {
-        delete commentObj.writer;
-      }
-
-      return commentObj;
-    });
+    const formattedComments = comments.map(comment => ({
+      ...comment,
+      responseCount: comment.responses?.length || 0,
+      ...(!comment.writer && { writer: undefined })
+    }));
 
     return res.status(200).json({
       success: true,
-      message: 'Plate comments data successfully found.',
+      message: 'Comments fetched successfully.',
       data: formattedComments
     });
+
   } catch (error) {
-    console.error(error);
-    next(error);
+    console.error('Plate comments error:', error);
+    next(new errorResponse('Server error', 500));
   }
 };
 
@@ -195,13 +193,24 @@ export const commentResponses = async (req, res, next) => {
     if (!commentData) {
       return next(new errorResponse('Comment can not be found.', 404));
     }
-    const responses = await Response.find({comment: commentId})
-      .populate("writer", "username");
+
+    const responses = await Response.find({ comment: commentId })
+      .populate("writer", "username")
+      .lean();
+
+    const uniqueResponses = responses.filter(
+      (response, index, self) =>
+        index === self.findIndex(
+          (r) => r._id.toString() === response._id.toString()
+        )
+    );
+
     return res.status(200).json({
       success: true,
       message: 'Comment response data successfully found.',
-      data: responses
+      data: uniqueResponses
     });
+
   } catch (error) {
     console.error(error);
     next(error);

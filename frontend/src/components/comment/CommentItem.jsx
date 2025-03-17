@@ -7,11 +7,13 @@ import EmojiPicker from 'emoji-picker-react';
 import ResponseItem from '../response/ResponseItem.jsx'
 
 const CommentItem = ({ comment }) => {
+  const [responseCount, setResponseCount] = useState(comment.responseCount || 0);
+
   const { user, isAuthenticated } = useAuthStore();
 
   const { updateComment, deleteComment, addReaction, deleteReaction } = useCommentStore();
 
-  const { responses, getResponses, createResponse } = useResponseStore();
+  const { responses, getResponses, createResponse, isLoading } = useResponseStore();
   const [showResponses, setShowResponses] = useState(false);
 
   const [editingComment, setEditingComment] = useState(false);
@@ -89,13 +91,14 @@ const CommentItem = ({ comment }) => {
   };
 
   const handleSubmitReply = async () => {
-    if (replyText.trim() === '' || replyText.length < 3) return;
+    if (replyText.trim() === '' || replyText.length < 10) return;
 
     try {
       const success = await createResponse(replyText, comment._id);
       if (success) {
         setReplyMode(false);
         setReplyText('');
+        setResponseCount(prev => prev + 1);
       }
     } catch (error) {
       console.error('Reply submission error:', error);
@@ -154,7 +157,7 @@ const CommentItem = ({ comment }) => {
   };
 
   const showReplyValidation = () => {
-    return replyText.length > 0 && (replyText.length < 3 || replyText.length > 300);
+    return replyText.length > 0 && (replyText.length < 10 || replyText.length > 100);
   };
 
   const calculateReactions = (reactions) => {
@@ -327,31 +330,44 @@ const CommentItem = ({ comment }) => {
             </div>
           )}
 
-          {/* Display replies here if you have them in your data model */}
-          {(
-            <div className="mt-2">
-              <button
-                onClick={async () => {
-                  if (!showResponses) await getResponses(comment._id);
-                  setShowResponses(!showResponses);
-                }}
-                className="text-sm text-blue-500 hover:underline"
-              >
-                {showResponses ? 'Hide responses' : `View responses (${responses[comment._id]?.length || 0})`}
-              </button>
+          {/* Display replies here */}
+          <div className="mt-2">
+            <button
+              onClick={async () => {
+                if (!showResponses) {
+                  await getResponses(comment._id);
+                }
+                setShowResponses(!showResponses);
+              }}
+              className="text-sm text-blue-500 hover:underline"
+            >
+              {showResponses ?
+                'Hide responses' :
+                `View responses (${responseCount})`
+              }
+            </button>
 
-              {showResponses && responses[comment._id]?.map(response => (
-                <ResponseItem key={response._id} response={response} />
-              ))}
+            {showResponses && (
+              <div>
+                {isLoading ? (
+                  <div className="ml-4 mt-2 text-sm text-gray-500">Loading responses...</div>
+                ) : responses[comment._id]?.length > 0 ? (
+                  responses[comment._id]?.map(response => (
+                    <ResponseItem key={`${response._id}-${response.updatedAt}`} response={response} onDelete={() => setResponseCount(prev => prev - 1)} />
+                  ))
+                ) : (
+                  <div className="ml-4 mt-2 text-sm text-gray-500">No responses yet</div>
+                )}
+              </div>
+            )}
 
-              {/* Reply form */}
-              {replyMode && (
-                <div className="mt-2 ml-4">
-                  {/* Existing reply form */}
-                </div>
-              )}
-            </div>
-          )}
+            {/* Reply form */}
+            {replyMode && (
+              <div className="mt-2 ml-4">
+                {/* Existing reply form */}
+              </div>
+            )}
+          </div>
 
           {/* Reply input area */}
           {replyMode && (
@@ -402,7 +418,7 @@ const CommentItem = ({ comment }) => {
                 <button
                   onClick={handleSubmitReply}
                   className="flex items-center gap-1 px-3 py-1 text-xs bg-primary text-primary-content rounded-md hover:opacity-80"
-                  disabled={replyText.length < 3 || replyText.length > 300}
+                  disabled={replyText.length < 10 || replyText.length > 100}
                 >
                   <Send className="size-3" />
                   <span>Reply</span>
